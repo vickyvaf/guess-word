@@ -1,0 +1,62 @@
+{
+  "fruits": [
+    {
+      "clue": "A red fruit with small seeds on its surface",
+      "answer": "strawberry"
+    },
+    {
+      "clue": "A long yellow fruit, often eaten as a snack",
+      "answer": "banana"
+    }
+  ],
+  "animals": [
+    {
+      "clue": "A large animal known for jumping and carrying its young in a pouch",
+      "answer": "kangaroo"
+    },
+    {
+      "clue": "A sea creature with eight arms",
+      "answer": "octopus"
+    }
+  ],
+  "vehicles": [
+    {
+      "clue": "A two-wheeled vehicle powered by pedaling",
+      "answer": "bicycle"
+    },
+    {
+      "clue": "A train that runs on tracks to transport people",
+      "answer": "train"
+    }
+  ],
+  "colors": [
+    {
+      "clue": "The color made by mixing blue and yellow",
+      "answer": "green"
+    },
+    {
+      "clue": "The color of fire and blood",
+      "answer": "red"
+    }
+  ],
+  "foods": [
+    {
+      "clue": "A Japanese dish made of rice and raw fish",
+      "answer": "sushi"
+    },
+    {
+      "clue": "A popular Italian dish topped with cheese and tomato sauce",
+      "answer": "pizza"
+    }
+  ],
+  "musical_instruments": [
+    {
+      "clue": "A string instrument with six strings often played by strumming",
+      "answer": "guitar"
+    },
+    {
+      "clue": "A brass instrument with valves and a bright sound",
+      "answer": "trumpet"
+    }
+  ]
+}

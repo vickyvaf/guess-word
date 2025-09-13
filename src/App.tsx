@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import data from "./data.json";
 
 function Modal({
   open,
@@ -91,9 +92,20 @@ function MathGridBg({
   cell?: number;
   major?: number;
 }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // trigger animasi ketika pertama kali render
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
   const style = {
     width: "100vw",
     height: "100vh",
+    position: "absolute" as const,
+    inset: 0,
+    zIndex: -10,
     backgroundImage: `
       linear-gradient(to right, rgba(59,130,246,0.05) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(59,130,246,0.05) 1px, transparent 1px),
@@ -106,15 +118,86 @@ function MathGridBg({
       ${major}px ${major}px,
       ${major}px ${major}px
     `,
+    clipPath: visible
+      ? "polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+      : "polygon(0 0, 0 0, 0 0, 0 0)",
+    transition: "clip-path 1s ease-out",
   } as const;
 
   return <div style={style} />;
+}
+
+function ChooseCategory({}) {
+  const categories = [
+    { title: "Animals", description: "Guess the names of animals" },
+    { title: "Fruits", description: "Guess the names of fruits" },
+    { title: "Countries", description: "Guess country names around the world" },
+    { title: "Sports", description: "Guess different sports names" },
+  ];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1rem",
+        position: "absolute",
+        bottom: "50%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        userSelect: "none",
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          fontSize: "3rem",
+          lineHeight: 1.2,
+          marginBottom: "1rem",
+        }}
+      >
+        Choose Category
+      </h2>
+      <div style={{ display: "flex", gap: "1rem" }}>
+        {categories.map((category) => (
+          <button
+            key={category.title}
+            style={{
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              border: "2px solid black",
+              borderRadius: "10px",
+              padding: "1rem 2rem",
+              background: "white",
+              boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
+              fontWeight: 700,
+              userSelect: "none",
+              fontFamily: "inherit",
+            }}
+            onMouseDown={(e) =>
+              (e.currentTarget.style.transform = "scale(0.97)")
+            }
+            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onClick={() => {
+              new Audio("/casual-click-pop-ui.mp3");
+            }}
+          >
+            {category.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [volume, setVolume] = useState(100); // 0–100
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [showContent, setShowContent] = useState("welcome");
 
   // siapkan audio sekali
   useEffect(() => {
@@ -147,7 +230,7 @@ function App() {
         style={{
           width: "100%",
           position: "absolute",
-          display: "flex",
+          display: showContent === "welcome" ? "flex" : "none",
           flexDirection: "column",
           alignItems: "center",
           gap: "2rem",
@@ -161,7 +244,7 @@ function App() {
           style={{
             margin: 0,
             fontSize: "1.5rem",
-            maxWidth: "800px",
+            maxWidth: "900px",
             lineHeight: 1.4,
             userSelect: "none",
             textAlign: "center",
@@ -169,7 +252,7 @@ function App() {
         >
           <span
             style={{
-              fontSize: "2.5rem",
+              fontSize: "3rem",
               fontWeight: "bold",
             }}
           >
@@ -177,8 +260,12 @@ function App() {
           </span>
           <br />
           <br />
-          Try to uncover the hidden word by guessing letters before you run out
-          of attempts. Sharpen your vocabulary and have fun along the way!
+          <span>
+            Try to uncover the hidden word by guessing letters before you run
+            out of attempts.
+          </span>
+          <br />
+          <span> Sharpen your vocabulary and have fun along the way!</span>
         </p>
         <h1
           style={{
@@ -198,11 +285,15 @@ function App() {
           onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
           onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          onClick={playSound}
+          onClick={() => {
+            playSound();
+            setShowContent("choose-category");
+          }}
         >
           Play
         </h1>
       </div>
+      {showContent === "choose-category" ? <ChooseCategory /> : null}
       <img
         src="/champion.png"
         className="logo"
@@ -246,7 +337,7 @@ function App() {
           playSound();
         }}
       />
-      <MathGridBg cell={30} major={30} />;
+      <MathGridBg cell={30} major={30} />
       <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Settings">
         <div
           style={{
