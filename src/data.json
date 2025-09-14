@@ -7,6 +7,194 @@
     {
       "clue": "A long yellow fruit, often eaten as a snack",
       "answer": "banana"
+    },
+    {
+      "clue": "A round green or red fruit, crisp and juicy",
+      "answer": "apple"
+    },
+    {
+      "clue": "A large fruit with a thick green rind and red, juicy inside",
+      "answer": "watermelon"
+    },
+    {
+      "clue": "A small, round blue fruit that grows in clusters",
+      "answer": "blueberry"
+    },
+    {
+      "clue": "A sweet tropical fruit with spiky skin and yellow flesh",
+      "answer": "pineapple"
+    },
+    {
+      "clue": "A small, round, and usually purple or green fruit eaten in bunches",
+      "answer": "grape"
+    },
+    {
+      "clue": "A tropical fruit with orange flesh and large black seeds",
+      "answer": "papaya"
+    },
+    {
+      "clue": "A small, oval, fuzzy brown fruit with green flesh inside",
+      "answer": "kiwi"
+    },
+    {
+      "clue": "A citrus fruit that is round and orange in color",
+      "answer": "orange"
+    },
+    {
+      "clue": "A round, yellow fruit known for its sour taste and juice",
+      "answer": "lemon"
+    },
+    {
+      "clue": "A round, sweet fruit with red or yellow skin and a pit inside",
+      "answer": "peach"
+    },
+    {
+      "clue": "A small, tart, red fruit often used in pies or jams",
+      "answer": "cherry"
+    },
+    {
+      "clue": "A large, yellow fruit with curved shape and soft, sweet flesh",
+      "answer": "plantain"
+    },
+    {
+      "clue": "A large, spiky tropical fruit with a strong smell and soft, yellow flesh",
+      "answer": "durian"
+    },
+    {
+      "clue": "A small, sweet fruit that comes in red, black, or white and grows in bunches",
+      "answer": "currant"
+    },
+    {
+      "clue": "A smooth-skinned peach-like fruit with sweet, juicy flesh",
+      "answer": "nectarine"
+    },
+    {
+      "clue": "A sweet, orange tropical fruit with a large seed inside",
+      "answer": "mango"
+    },
+    {
+      "clue": "A juicy fruit with green skin and often eaten as a topping for desserts",
+      "answer": "pear"
+    },
+    {
+      "clue": "A fuzzy, brown fruit with a sweet, soft orange inside",
+      "answer": "apricot"
+    },
+    {
+      "clue": "A fruit covered in small, round, red druplets and often used for making jam",
+      "answer": "raspberry"
+    },
+    {
+      "clue": "A small, tart berry often used as a holiday sauce",
+      "answer": "cranberry"
+    },
+    {
+      "clue": "A citrus fruit smaller and sweeter than an orange, easy to peel",
+      "answer": "tangerine"
+    },
+    {
+      "clue": "A large, oval fruit with yellow skin and sweet orange flesh",
+      "answer": "cantaloupe"
+    },
+    {
+      "clue": "A round, green citrus fruit, often used in drinks",
+      "answer": "lime"
+    },
+    {
+      "clue": "A tropical fruit with smooth, orange skin and black seeds, related to papaya",
+      "answer": "loquat"
+    },
+    {
+      "clue": "A hard, brown shell covers this tropical fruit with white flesh and liquid inside",
+      "answer": "coconut"
+    },
+    {
+      "clue": "A red and juicy fruit that's technically a berry, enjoyed in summer",
+      "answer": "tomato"
+    },
+    {
+      "clue": "A tiny fruit used for making pies and jams, often purple or blue",
+      "answer": "blackberry"
+    },
+    {
+      "clue": "A sweet, dark fruit with wrinkled skin, eaten dried or fresh",
+      "answer": "date"
+    },
+    {
+      "clue": "A small, tart, greenish berry with a papery husk",
+      "answer": "gooseberry"
+    },
+    {
+      "clue": "A bright pink tropical fruit with white flesh and black seeds",
+      "answer": "dragonfruit"
+    },
+    {
+      "clue": "A fruit with thick orange skin, seed-filled segments, and tart flavor",
+      "answer": "grapefruit"
+    },
+    {
+      "clue": "A soft, purple or green fruit with sweet flesh and tiny seeds",
+      "answer": "fig"
+    },
+    {
+      "clue": "A round fruit with thick red skin and juicy seeds inside",
+      "answer": "pomegranate"
+    },
+    {
+      "clue": "A small, green, oval fruit often eaten dried as a snack",
+      "answer": "olive"
+    },
+    {
+      "clue": "A tropical fruit with a green or yellow tough skin and sweet, creamy white flesh inside",
+      "answer": "cherimoya"
+    },
+    {
+      "clue": "A sweet, yellow fruit often eaten dried, sometimes called a prune",
+      "answer": "plum"
+    },
+    {
+      "clue": "A small, round, blue-black berry used in health juices",
+      "answer": "elderberry"
+    },
+    {
+      "clue": "A star-shaped fruit when sliced, with yellow skin and tart taste",
+      "answer": "starfruit"
+    },
+    {
+      "clue": "A soft, pulpy, exotic Southeast Asian fruit that has a strong odor and is spiky outside",
+      "answer": "durian"
+    },
+    {
+      "clue": "A pear-shaped tropical fruit, green on the outside, creamy inside, often used for guacamole",
+      "answer": "avocado"
+    },
+    {
+      "clue": "A small, round, scarlet or purple fruit, used in pies or eaten fresh",
+      "answer": "boysenberry"
+    },
+    {
+      "clue": "A tiny, blue or black fruit used in jams and jellies, often found in clusters",
+      "answer": "huckleberry"
+    },
+    {
+      "clue": "A large, green- or orange-skinned fruit with sweet, salmon-colored flesh",
+      "answer": "melon"
+    },
+    {
+      "clue": "A small, orange fruit with thin skin and many seeds, popular in Asia",
+      "answer": "kumquat"
+    },
+    {
+      "clue": "A tiny, red or white fruit, often found in desserts or as garnish",
+      "answer": "currant"
+    },
+    {
+      "clue": "A spherical fruit with hard shell, filled with sweet, tangy, black seeds and pulp",
+      "answer": "passionfruit"
+    },
+    {
+      "clue": "A small green or purple fruit made into wine or eaten fresh",
+      "answer": "grape"
     }
   ],
   "animals": [
@@ -17,6 +205,194 @@
     {
       "clue": "A sea creature with eight arms",
       "answer": "octopus"
+    },
+    {
+      "clue": "A tall animal with a very long neck",
+      "answer": "giraffe"
+    },
+    {
+      "clue": "A big, grey animal with a trunk",
+      "answer": "elephant"
+    },
+    {
+      "clue": "A wild cat known for its roaring and mane",
+      "answer": "lion"
+    },
+    {
+      "clue": "A black and white animal that lives in cold places and can swim",
+      "answer": "penguin"
+    },
+    {
+      "clue": "A farm animal raised for wool",
+      "answer": "sheep"
+    },
+    {
+      "clue": "A pet that purrs and chases mice",
+      "answer": "cat"
+    },
+    {
+      "clue": "A friendly pet that barks and wags its tail",
+      "answer": "dog"
+    },
+    {
+      "clue": "An animal with black and white stripes",
+      "answer": "zebra"
+    },
+    {
+      "clue": "A large sea mammal with a horn on its nose",
+      "answer": "narwhal"
+    },
+    {
+      "clue": "A marine mammal known for jumping and making clicking sounds",
+      "answer": "dolphin"
+    },
+    {
+      "clue": "A bird that can mimic human speech",
+      "answer": "parrot"
+    },
+    {
+      "clue": "A big, brown animal that loves honey and fish",
+      "answer": "bear"
+    },
+    {
+      "clue": "An animal with a hard shell that moves very slowly",
+      "answer": "tortoise"
+    },
+    {
+      "clue": "A small, hopping animal with long ears",
+      "answer": "rabbit"
+    },
+    {
+      "clue": "A huge mammal, the largest animal on earth",
+      "answer": "blue whale"
+    },
+    {
+      "clue": "A powerful big cat with black spots and fast running speed",
+      "answer": "cheetah"
+    },
+    {
+      "clue": "A reptile with scales and a forked tongue that slithers",
+      "answer": "snake"
+    },
+    {
+      "clue": "A flying mammal that hangs upside down",
+      "answer": "bat"
+    },
+    {
+      "clue": "A wild cat that prowls the jungle and has orange fur with black stripes",
+      "answer": "tiger"
+    },
+    {
+      "clue": "A small, clever animal famous for collecting nuts",
+      "answer": "squirrel"
+    },
+    {
+      "clue": "A pink farm animal that likes to roll in mud",
+      "answer": "pig"
+    },
+    {
+      "clue": "A fish with a famous movie who is orange and white",
+      "answer": "clownfish"
+    },
+    {
+      "clue": "A large, white bear found in the Arctic",
+      "answer": "polar bear"
+    },
+    {
+      "clue": "A bird known for waking people up at dawn",
+      "answer": "rooster"
+    },
+    {
+      "clue": "An insect that makes honey and can sting",
+      "answer": "bee"
+    },
+    {
+      "clue": "A bird that is often a symbol of peace and can be spotted in cities",
+      "answer": "pigeon"
+    },
+    {
+      "clue": "An animal with antlers found in forests",
+      "answer": "deer"
+    },
+    {
+      "clue": "A slow-moving, green reptile with a shell",
+      "answer": "turtle"
+    },
+    {
+      "clue": "A friendly marine mammal with flippers and whiskers",
+      "answer": "seal"
+    },
+    {
+      "clue": "A bird of prey with a white head, a symbol of the USA",
+      "answer": "bald eagle"
+    },
+    {
+      "clue": "A large animal with tusks and a trunk",
+      "answer": "elephant"
+    },
+    {
+      "clue": "A desert animal with humps on its back",
+      "answer": "camel"
+    },
+    {
+      "clue": "A rodent known for building dams in streams",
+      "answer": "beaver"
+    },
+    {
+      "clue": "A brown, furry animal that loves bamboo",
+      "answer": "panda"
+    },
+    {
+      "clue": "A big, strong cat that lives in snow and has thick fur",
+      "answer": "snow leopard"
+    },
+    {
+      "clue": "A small bird that is often kept in cages and can sing",
+      "answer": "canary"
+    },
+    {
+      "clue": "A sea animal with a spiny exterior and orange color",
+      "answer": "sea urchin"
+    },
+    {
+      "clue": "A furry animal with black mask, often found near trash cans",
+      "answer": "raccoon"
+    },
+    {
+      "clue": "A massive marine animal with baleen plates for filtering food",
+      "answer": "humpback whale"
+    },
+    {
+      "clue": "A big cat that lives in Africa and is king of the jungle",
+      "answer": "lion"
+    },
+    {
+      "clue": "A big bird that can't fly but can run very fast",
+      "answer": "ostrich"
+    },
+    {
+      "clue": "A crustacean with large pincers, found on beaches",
+      "answer": "crab"
+    },
+    {
+      "clue": "A prickly little animal that curls into a ball when scared",
+      "answer": "hedgehog"
+    },
+    {
+      "clue": "A striped orange-and-black insect that pollinates flowers",
+      "answer": "monarch butterfly"
+    },
+    {
+      "clue": "A wild dog found in the forests and tundra, known for howling",
+      "answer": "wolf"
+    },
+    {
+      "clue": "A small, jumping bug that makes noise with its legs",
+      "answer": "cricket"
+    },
+    {
+      "clue": "A marsupial found in Australia, known for sleeping in trees",
+      "answer": "koala"
     }
   ],
   "vehicles": [
@@ -27,6 +403,190 @@
     {
       "clue": "A train that runs on tracks to transport people",
       "answer": "train"
+    },
+    {
+      "clue": "A vehicle with four wheels powered by an engine, used for personal transport",
+      "answer": "car"
+    },
+    {
+      "clue": "A large vehicle used for transporting many passengers in a city",
+      "answer": "bus"
+    },
+    {
+      "clue": "A two-wheeled motor vehicle",
+      "answer": "motorcycle"
+    },
+    {
+      "clue": "A big vehicle that carries goods over long distances",
+      "answer": "truck"
+    },
+    {
+      "clue": "A vehicle that flies in the sky, with wings",
+      "answer": "airplane"
+    },
+    {
+      "clue": "A road vehicle with three wheels, common in some Asian countries",
+      "answer": "auto rickshaw"
+    },
+    {
+      "clue": "A personal vehicle with pedals and electric motor",
+      "answer": "e-bike"
+    },
+    {
+      "clue": "A water vehicle powered by oars",
+      "answer": "rowboat"
+    },
+    {
+      "clue": "A vehicle that flies by rotating blades on top",
+      "answer": "helicopter"
+    },
+    {
+      "clue": "A small, lightweight vehicle with a motor, like a scooter",
+      "answer": "moped"
+    },
+    {
+      "clue": "A car designed with a removable or folding roof",
+      "answer": "convertible"
+    },
+    {
+      "clue": "A compact vehicle often used to transport a family",
+      "answer": "minivan"
+    },
+    {
+      "clue": "A large, heavy vehicle used in construction sites to dig holes",
+      "answer": "excavator"
+    },
+    {
+      "clue": "A four-wheeled vehicle used mostly for construction and farming",
+      "answer": "tractor"
+    },
+    {
+      "clue": "A two- or three-level passenger vehicle used in some cities",
+      "answer": "double-decker bus"
+    },
+    {
+      "clue": "A vehicle that runs on rails below ground",
+      "answer": "subway"
+    },
+    {
+      "clue": "A long, narrow boat powered by paddles, used on rivers or lakes",
+      "answer": "canoe"
+    },
+    {
+      "clue": "A ship designed for cruising or long voyages",
+      "answer": "cruise ship"
+    },
+    {
+      "clue": "A land vehicle designed primarily for off-road use",
+      "answer": "jeep"
+    },
+    {
+      "clue": "A truck with an open back for carrying goods",
+      "answer": "pickup truck"
+    },
+    {
+      "clue": "A car designed for performance and speed",
+      "answer": "sports car"
+    },
+    {
+      "clue": "A vehicle with a cabin and a cargo bed, used for transporting goods",
+      "answer": "lorry"
+    },
+    {
+      "clue": "A small passenger car, often with a hatchback or sedan body",
+      "answer": "hatchback"
+    },
+    {
+      "clue": "A vehicle with a long body and luxurious features, used often for events",
+      "answer": "limousine"
+    },
+    {
+      "clue": "A small motorized vehicle for one person, usually with two wheels",
+      "answer": "motor scooter"
+    },
+    {
+      "clue": "A bus designed specifically to transport children to school",
+      "answer": "school bus"
+    },
+    {
+      "clue": "A small aircraft with fixed wings and one or two engines",
+      "answer": "biplane"
+    },
+    {
+      "clue": "A large vehicle that removes snow from roads",
+      "answer": "snowplow"
+    },
+    {
+      "clue": "A public road vehicle for carrying goods",
+      "answer": "delivery van"
+    },
+    {
+      "clue": "A river or harbor boat designed with a flat bottom",
+      "answer": "barge"
+    },
+    {
+      "clue": "A vehicle that can travel both on land and in water",
+      "answer": "amphibious vehicle"
+    },
+    {
+      "clue": "A large, rigid balloon that flies by hot air or gas",
+      "answer": "airship"
+    },
+    {
+      "clue": "A bus used for long-distance travel, often with comfortable seats",
+      "answer": "coach"
+    },
+    {
+      "clue": "A powerful vehicle used to pull or haul heavy loads",
+      "answer": "tow truck"
+    },
+    {
+      "clue": "A tram that runs on street rails",
+      "answer": "streetcar"
+    },
+    {
+      "clue": "A small, lightweight car with only three wheels",
+      "answer": "microcar"
+    },
+    {
+      "clue": "A long vehicle for carrying lots of luggage and passengers",
+      "answer": "van"
+    },
+    {
+      "clue": "A civilian vehicle designed with military features and camouflage",
+      "answer": "armored car"
+    },
+    {
+      "clue": "A ship powered by sails and wind",
+      "answer": "sailboat"
+    },
+    {
+      "clue": "A vehicle with two wheels, powered by a small engine, often seen in cities",
+      "answer": "vespa"
+    },
+    {
+      "clue": "A large truck used to carry liquids or gases",
+      "answer": "tanker"
+    },
+    {
+      "clue": "A vehicle that takes off and lands vertically, used for emergencies or news",
+      "answer": "helicopter"
+    },
+    {
+      "clue": "A vehicle designed for space travel",
+      "answer": "spaceship"
+    },
+    {
+      "clue": "A vehicle with special equipment to put out fires",
+      "answer": "fire engine"
+    },
+    {
+      "clue": "A two-wheeled human-powered racing vehicle",
+      "answer": "racing bicycle"
+    },
+    {
+      "clue": "A luxurious, powerful passenger vehicle, often sporty",
+      "answer": "coupé"
     }
   ],
   "colors": [
@@ -37,26 +597,194 @@
     {
       "clue": "The color of fire and blood",
       "answer": "red"
-    }
-  ],
-  "foods": [
-    {
-      "clue": "A Japanese dish made of rice and raw fish",
-      "answer": "sushi"
     },
     {
-      "clue": "A popular Italian dish topped with cheese and tomato sauce",
-      "answer": "pizza"
-    }
-  ],
-  "musical_instruments": [
-    {
-      "clue": "A string instrument with six strings often played by strumming",
-      "answer": "guitar"
+      "clue": "The color of the sky on a clear day",
+      "answer": "blue"
     },
     {
-      "clue": "A brass instrument with valves and a bright sound",
-      "answer": "trumpet"
+      "clue": "The color of ripe lemons",
+      "answer": "yellow"
+    },
+    {
+      "clue": "A dark shade somewhere between black and white",
+      "answer": "gray"
+    },
+    {
+      "clue": "The color of fresh grass",
+      "answer": "lime"
+    },
+    {
+      "clue": "The color created by mixing red and yellow",
+      "answer": "orange"
+    },
+    {
+      "clue": "A pale pink color, often associated with romance",
+      "answer": "rose"
+    },
+    {
+      "clue": "A deep purple color, often related to royalty",
+      "answer": "violet"
+    },
+    {
+      "clue": "A light brown color, similar to tree bark",
+      "answer": "tan"
+    },
+    {
+      "clue": "A shade of blue-green, named after a precious stone",
+      "answer": "turquoise"
+    },
+    {
+      "clue": "A dark shade of red",
+      "answer": "maroon"
+    },
+    {
+      "clue": "A bright shade of blue like the ocean",
+      "answer": "cyan"
+    },
+    {
+      "clue": "A deep blue color named after a flower",
+      "answer": "indigo"
+    },
+    {
+      "clue": "A soft color between pink and white",
+      "answer": "peach"
+    },
+    {
+      "clue": "A dark green color named after a herb",
+      "answer": "olive"
+    },
+    {
+      "clue": "A bright pink color often seen in flowers",
+      "answer": "fuchsia"
+    },
+    {
+      "clue": "A golden-yellow color, similar to honey",
+      "answer": "amber"
+    },
+    {
+      "clue": "A pale off-white color with yellowish tints",
+      "answer": "cream"
+    },
+    {
+      "clue": "A color between brown and red",
+      "answer": "rust"
+    },
+    {
+      "clue": "A bright yellow-green color named after a fruit",
+      "answer": "chartreuse"
+    },
+    {
+      "clue": "A dark purple color",
+      "answer": "eggplant"
+    },
+    {
+      "clue": "The color of snow",
+      "answer": "white"
+    },
+    {
+      "clue": "A color between blue and purple",
+      "answer": "periwinkle"
+    },
+    {
+      "clue": "A bright reddish-pink color",
+      "answer": "coral"
+    },
+    {
+      "clue": "A yellow-orange shade that looks like the setting sun",
+      "answer": "gold"
+    },
+    {
+      "clue": "A dark gray-black color",
+      "answer": "charcoal"
+    },
+    {
+      "clue": "A soft lilac shade",
+      "answer": "lavender"
+    },
+    {
+      "clue": "A pale blue color that resembles the sky",
+      "answer": "baby blue"
+    },
+    {
+      "clue": "A reddish-brown color, often used in painting",
+      "answer": "sienna"
+    },
+    {
+      "clue": "A rich reddish-orange color",
+      "answer": "vermillion"
+    },
+    {
+      "clue": "A bright red-orange color",
+      "answer": "scarlet"
+    },
+    {
+      "clue": "A very dark blue color",
+      "answer": "navy"
+    },
+    {
+      "clue": "A bright yellow color like the sun",
+      "answer": "canary"
+    },
+    {
+      "clue": "A muted pink color",
+      "answer": "dusty rose"
+    },
+    {
+      "clue": "A deep reddish-pink color",
+      "answer": "magenta"
+    },
+    {
+      "clue": "A color between green and blue",
+      "answer": "teal"
+    },
+    {
+      "clue": "A dark yellow-green color",
+      "answer": "moss"
+    },
+    {
+      "clue": "A bright purple-red color",
+      "answer": "burgundy"
+    },
+    {
+      "clue": "A pale greenish-blue color",
+      "answer": "aqua"
+    },
+    {
+      "clue": "A soft grayish-green color",
+      "answer": "sage"
+    },
+    {
+      "clue": "A color between pink and purple",
+      "answer": "mauve"
+    },
+    {
+      "clue": "A dark reddish-brown color",
+      "answer": "mahogany"
+    },
+    {
+      "clue": "A light brownish-yellow color",
+      "answer": "beige"
+    },
+    {
+      "clue": "A color similar to burnt orange",
+      "answer": "tangerine"
+    },
+    {
+      "clue": "A metallic silver-gray color",
+      "answer": "steel"
+    },
+    {
+      "clue": "A bright sky blue color",
+      "answer": "azure"
+    },
+    {
+      "clue": "A reddish-orange color found on foxes",
+      "answer": "sienna"
+    },
+    {
+      "clue": "A soft pale yellow color",
+      "answer": "butter"
     }
   ]
 }

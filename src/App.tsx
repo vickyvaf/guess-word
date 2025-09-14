@@ -1,205 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import data from "./data.json";
-
-function Modal({
-  open,
-  onClose,
-  children,
-  title = "Settings",
-}: {
-  open: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  title?: string;
-}) {
-  // Tutup dengan Esc
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.35)",
-        display: "grid",
-        placeItems: "center",
-        zIndex: 50,
-      }}
-      onClick={onClose} // klik backdrop = close
-    >
-      <div
-        style={{
-          width: "min(90vw, 560px)",
-          background: "white",
-          border: "3px solid black",
-          borderRadius: "1rem",
-          boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
-          padding: "1rem 1.25rem",
-          color: "#213547",
-        }}
-        onClick={(e) => e.stopPropagation()} // cegah close saat klik isi
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            justifyContent: "space-between",
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: "1.5rem", lineHeight: 1.2 }}>
-            {title}
-          </h2>
-          <button
-            onClick={() => {
-              onClose();
-              new Audio("/casual-click-pop-ui.mp3").play();
-            }}
-            aria-label="Close"
-            style={{
-              cursor: "pointer",
-              border: "2px solid black",
-              background: "white",
-              borderRadius: "0.5rem",
-              padding: "0.25rem 0.5rem",
-              boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
-            }}
-          >
-            ✕
-          </button>
-        </div>
-
-        <div style={{ marginTop: "1rem" }}>{children}</div>
-      </div>
-    </div>
-  );
-}
-
-function MathGridBg({
-  cell = 32,
-  major = 160,
-}: {
-  cell?: number;
-  major?: number;
-}) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    // trigger animasi ketika pertama kali render
-    const t = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
-  const style = {
-    width: "100vw",
-    height: "100vh",
-    position: "absolute" as const,
-    inset: 0,
-    zIndex: -10,
-    backgroundImage: `
-      linear-gradient(to right, rgba(59,130,246,0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(59,130,246,0.05) 1px, transparent 1px),
-      linear-gradient(to right, rgba(37,99,235,0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(37,99,235,0.1) 1px, transparent 1px)
-    `,
-    backgroundSize: `
-      ${cell}px ${cell}px,
-      ${cell}px ${cell}px,
-      ${major}px ${major}px,
-      ${major}px ${major}px
-    `,
-    clipPath: visible
-      ? "polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      : "polygon(0 0, 0 0, 0 0, 0 0)",
-    transition: "clip-path 1s ease-out",
-  } as const;
-
-  return <div style={style} />;
-}
-
-function ChooseCategory({}) {
-  const categories = [
-    { title: "Animals", description: "Guess the names of animals" },
-    { title: "Fruits", description: "Guess the names of fruits" },
-    { title: "Countries", description: "Guess country names around the world" },
-    { title: "Sports", description: "Guess different sports names" },
-  ];
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1rem",
-        position: "absolute",
-        bottom: "50%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        userSelect: "none",
-      }}
-    >
-      <h2
-        style={{
-          margin: 0,
-          fontSize: "3rem",
-          lineHeight: 1.2,
-          marginBottom: "1rem",
-        }}
-      >
-        Choose Category
-      </h2>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        {categories.map((category) => (
-          <button
-            key={category.title}
-            style={{
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              border: "2px solid black",
-              borderRadius: "10px",
-              padding: "1rem 2rem",
-              background: "white",
-              boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
-              fontWeight: 700,
-              userSelect: "none",
-              fontFamily: "inherit",
-            }}
-            onMouseDown={(e) =>
-              (e.currentTarget.style.transform = "scale(0.97)")
-            }
-            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onClick={() => {
-              new Audio("/casual-click-pop-ui.mp3");
-            }}
-          >
-            {category.title}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { MathGridBg } from "./components/background";
+import { ChooseCategory } from "./components/choose-category";
+import { Button } from "./uikits/button";
+import { Modal } from "./uikits/modal";
+import { PlayingField } from "./components/playing";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
-  const [volume, setVolume] = useState(100); // 0–100
+  const [volume, setVolume] = useState(100);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [showContent, setShowContent] = useState("welcome");
+  const [categorySelected, setCategorySelected] = useState("");
 
-  // siapkan audio sekali
   useEffect(() => {
     audioRef.current = new Audio("/casual-click-pop-ui.mp3");
     audioRef.current.volume = 1;
@@ -267,33 +80,26 @@ function App() {
           <br />
           <span> Sharpen your vocabulary and have fun along the way!</span>
         </p>
-        <h1
-          style={{
-            width: "fit-content",
-            margin: 0,
-            fontSize: "3rem",
-            lineHeight: 1.1,
-            cursor: "pointer",
-            border: "4px solid black",
-            padding: "1rem 3rem",
-            borderRadius: "0.5em",
-            backgroundColor: "white",
-            boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
-            userSelect: "none",
-            transition: "transform 0.1s ease",
-          }}
-          onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
-          onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+        <Button
           onClick={() => {
-            playSound();
             setShowContent("choose-category");
           }}
         >
           Play
-        </h1>
+        </Button>
       </div>
-      {showContent === "choose-category" ? <ChooseCategory /> : null}
+      {showContent === "choose-category" ? (
+        <ChooseCategory
+          onClick={setShowContent}
+          setCategorySelected={setCategorySelected}
+        />
+      ) : null}
+      {showContent === "playing" ? (
+        <PlayingField
+          categorySelected={categorySelected}
+          setShowContent={setShowContent}
+        />
+      ) : null}
       <img
         src="/champion.png"
         className="logo"
