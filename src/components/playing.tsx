@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import data from "../data.json";
 import { Button } from "../uikits/button";
 import { HealthPoint } from "./health-point";
+import { useSettings } from "../contexts/SettingsContext";
 
 const MAX_HEALTH = 5;
 const TOTAL = 5;
@@ -13,6 +14,7 @@ export function PlayingField({
   categorySelected: string;
   setShowContent: (s: string) => void;
 }) {
+  const { volume } = useSettings();
   const [completed, setCompleted] = useState(0);
   const [countdown, setCountdown] = useState(3);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -62,7 +64,7 @@ export function PlayingField({
 
     try {
       const a = new Audio("/casual-click-pop-ui.mp3");
-      a.volume = 0.6;
+      a.volume = (volume / 100) * 0.6; // Apply volume setting with 60% multiplier
       a.play();
     } catch {}
   };
@@ -91,7 +93,7 @@ export function PlayingField({
     // sfx opsional
     try {
       const s = new Audio("/success-quiz.mp3");
-      s.volume = 0.7;
+      s.volume = (volume / 100) * 0.7; // Apply volume setting with 70% multiplier
       s.play();
     } catch {}
 

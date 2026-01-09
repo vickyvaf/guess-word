@@ -60,10 +60,7 @@ export function Modal({
             {title}
           </h2>
           <Button
-            onClick={() => {
-              onClose();
-              new Audio("/casual-click-pop-ui.mp3").play();
-            }}
+            onClick={onClose}
             aria-label="Close"
             style={{
               cursor: "pointer",
