@@ -35,7 +35,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const [backgroundMusicVolume, setBackgroundMusicVolumeState] = useState(() => {
     const saved = localStorage.getItem('backgroundMusicVolume');
-    return saved ? parseInt(saved, 10) : 50
+    return saved ? parseInt(saved, 10) : 0
   });
 
   // Initialize auth state
