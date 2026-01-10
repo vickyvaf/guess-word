@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import data from "../data.json";
 import { Button } from "../uikits/button";
 import { HealthPoint } from "./health-point";
 import { useSettings } from "../contexts/SettingsContext";
+import { addToLeaderboard } from "./modal-leaderboard";
 
 const MAX_HEALTH = 5;
 const TOTAL = 5;
@@ -20,6 +21,7 @@ export function PlayingField({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [guessed, setGuessed] = useState<string[]>([]);
   const [health, setHealth] = useState(MAX_HEALTH);
+  const hasSavedScore = useRef(false);
 
   // @ts-ignore
   const questions = data?.[categorySelected] || [];
@@ -30,6 +32,7 @@ export function PlayingField({
       setHealth(MAX_HEALTH);
       setCountdown(3);
       setCompleted(0); // reset counter saat ganti kategori
+      hasSavedScore.current = false; // reset saved flag saat ganti kategori
     }
   }, [categorySelected]);
 
@@ -83,6 +86,22 @@ export function PlayingField({
 
   // 🏆 Menang saat completed == TOTAL
   const isWin = completed >= TOTAL;
+
+  // Save to leaderboard when game is won (only once)
+  useEffect(() => {
+    if (isWin && completed === TOTAL && !hasSavedScore.current) {
+      hasSavedScore.current = true;
+      addToLeaderboard(
+        "Player", // This will be replaced by user data from auth
+        completed,
+        categorySelected,
+        health
+      ).catch((error) => {
+        console.error("Error saving to leaderboard:", error);
+        hasSavedScore.current = false; // Reset on error so user can try again
+      });
+    }
+  }, [isWin, completed, categorySelected, health]);
 
   // Jika solved → naikkan completed, lalu:
   // - jika sudah mencapai TOTAL, TIDAK lanjut ke soal berikutnya
@@ -456,6 +475,7 @@ export function PlayingField({
                     const len = Math.max(1, questions.length);
                     setCurrentQuestionIndex(Math.floor(Math.random() * len));
                     setCountdown(3);
+                    hasSavedScore.current = false; // reset saved flag saat play again
                   }}
                   style={{
                     border: "3px solid black",

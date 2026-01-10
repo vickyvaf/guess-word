@@ -3,6 +3,7 @@ import { Button } from "../uikits/button";
 import { Modal } from "../uikits/modal";
 import { Trophy } from "lucide-react";
 import { useSettings } from "../contexts/SettingsContext";
+import { supabase } from "../lib/supabase";
 
 interface LeaderboardEntry {
   id: string;
@@ -11,6 +12,9 @@ interface LeaderboardEntry {
   category: string;
   healthRemaining: number;
   date: string;
+  email?: string;
+  fullName?: string;
+  avatarUrl?: string;
 }
 
 export function ModalLeaderboard() {
@@ -70,6 +74,31 @@ export function ModalLeaderboard() {
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
     return `${rank}.`;
+  };
+
+  const getUserInitials = (entry: LeaderboardEntry) => {
+    if (entry.fullName) {
+      const parts = entry.fullName.split(" ");
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return entry.fullName[0].toUpperCase();
+    }
+    if (entry.email) {
+      const parts = entry.email.split("@")[0].split(".");
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return entry.email[0].toUpperCase();
+    }
+    if (entry.playerName) {
+      const parts = entry.playerName.split(" ");
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return entry.playerName[0].toUpperCase();
+    }
+    return "?";
   };
 
   const clearLeaderboard = () => {
@@ -162,16 +191,50 @@ export function ModalLeaderboard() {
                     >
                       {getRankIcon(index + 1)}
                     </div>
+                    <div
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: "50%",
+                        border: "2px solid black",
+                        background: entry.avatarUrl
+                          ? `url(${entry.avatarUrl}) center/cover`
+                          : "#3b82f6",
+                        flexShrink: 0,
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 700,
+                        fontSize: "1rem",
+                        color: entry.avatarUrl ? "transparent" : "white",
+                      }}
+                      title={entry.fullName || entry.playerName || entry.email || "Anonymous"}
+                    >
+                      {entry.avatarUrl ? "" : getUserInitials(entry)}
+                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
                           fontWeight: 700,
                           fontSize: "1.1rem",
                           marginBottom: "0.25rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
                         }}
                       >
-                        {entry.playerName || "Anonymous"}
+                        {entry.fullName || entry.playerName || entry.email?.split("@")[0] || "Anonymous"}
                       </div>
+                      {entry.email && (
+                        <div
+                          style={{
+                            fontSize: "0.85rem",
+                            color: "#6b7280",
+                            marginBottom: "0.25rem",
+                          }}
+                        >
+                          {entry.email}
+                        </div>
+                      )}
                       <div
                         style={{
                           fontSize: "0.9rem",
@@ -239,30 +302,66 @@ export function ModalLeaderboard() {
 }
 
 // Helper function to add a score to the leaderboard
-export function addToLeaderboard(
+export async function addToLeaderboard(
   playerName: string,
   score: number,
   category: string,
   healthRemaining: number
 ) {
-  const entry: LeaderboardEntry = {
-    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    playerName,
-    score,
-    category,
-    healthRemaining,
-    date: new Date().toISOString(),
-  };
+  try {
+    // Get user data from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      console.log(user.email);
+      console.log(user.user_metadata?.full_name);
+      console.log(user.user_metadata?.avatar_url);
+    }
 
-  const saved = localStorage.getItem("leaderboard");
-  const entries: LeaderboardEntry[] = saved ? JSON.parse(saved) : [];
-  entries.push(entry);
+    const entry: LeaderboardEntry = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      playerName: user?.user_metadata?.full_name || user?.email?.split("@")[0] || playerName,
+      score,
+      category,
+      healthRemaining,
+      date: new Date().toISOString(),
+      email: user?.email || undefined,
+      fullName: user?.user_metadata?.full_name || undefined,
+      avatarUrl: user?.user_metadata?.avatar_url || undefined,
+    };
 
-  // Keep only top 50 entries
-  const sorted = entries.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+    const saved = localStorage.getItem("leaderboard");
+    const entries: LeaderboardEntry[] = saved ? JSON.parse(saved) : [];
+    entries.push(entry);
 
-  localStorage.setItem("leaderboard", JSON.stringify(sorted.slice(0, 50)));
+    // Keep only top 50 entries
+    const sorted = entries.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    localStorage.setItem("leaderboard", JSON.stringify(sorted.slice(0, 50)));
+  } catch (error) {
+    console.error("Error adding to leaderboard:", error);
+    // Fallback: save without user data if auth fails
+    const entry: LeaderboardEntry = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      playerName,
+      score,
+      category,
+      healthRemaining,
+      date: new Date().toISOString(),
+    };
+
+    const saved = localStorage.getItem("leaderboard");
+    const entries: LeaderboardEntry[] = saved ? JSON.parse(saved) : [];
+    entries.push(entry);
+
+    const sorted = entries.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    localStorage.setItem("leaderboard", JSON.stringify(sorted.slice(0, 50)));
+  }
 }

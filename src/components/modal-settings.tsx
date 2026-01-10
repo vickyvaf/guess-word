@@ -84,29 +84,20 @@ export function ModalSettings() {
                             </div>
 
                             <div style={{ display: "flex", gap: "8px" }}>
-                                <button
+                                <Button
                                     onClick={signOut}
                                     style={{
-                                        cursor: "pointer",
                                         border: "2px solid black",
                                         borderRadius: "10px",
                                         padding: "8px 12px",
                                         background: "#fee2e2",
                                         boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
                                         fontWeight: 600,
+                                        fontSize: "1rem",
                                     }}
-                                    onMouseDown={(e) =>
-                                        (e.currentTarget.style.transform = "scale(0.97)")
-                                    }
-                                    onMouseUp={(e) =>
-                                        (e.currentTarget.style.transform = "scale(1)")
-                                    }
-                                    onMouseLeave={(e) =>
-                                        (e.currentTarget.style.transform = "scale(1)")
-                                    }
                                 >
                                     Sign out
-                                </button>
+                                </Button>
                             </div>
                         </>
                     ) : (
@@ -137,10 +128,9 @@ export function ModalSettings() {
                             </div>
 
                             <div style={{ display: "flex", gap: "8px" }}>
-                                <button
+                                <Button
                                     onClick={signInWithGoogle}
                                     style={{
-                                        cursor: "pointer",
                                         border: "2px solid black",
                                         borderRadius: "10px",
                                         padding: "8px 12px",
@@ -149,16 +139,8 @@ export function ModalSettings() {
                                         display: "flex",
                                         alignItems: "center",
                                         gap: "8px",
+                                        fontSize: "1rem",
                                     }}
-                                    onMouseDown={(e) =>
-                                        (e.currentTarget.style.transform = "scale(0.97)")
-                                    }
-                                    onMouseUp={(e) =>
-                                        (e.currentTarget.style.transform = "scale(1)")
-                                    }
-                                    onMouseLeave={(e) =>
-                                        (e.currentTarget.style.transform = "scale(1)")
-                                    }
                                 >
                                     {/* Google "G" mini (inline SVG) */}
                                     <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden>
@@ -180,7 +162,7 @@ export function ModalSettings() {
                                         />
                                     </svg>
                                     Connect Google
-                                </button>
+                                </Button>
                             </div>
                         </>
                     )}
