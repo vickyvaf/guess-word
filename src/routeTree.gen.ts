@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ChooseRoomRouteImport } from './routes/choose-room'
 import { Route as ChooseCategoryRouteImport } from './routes/choose-category'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlayingCategoryRouteImport } from './routes/playing.$category'
 
+const ChooseRoomRoute = ChooseRoomRouteImport.update({
+  id: '/choose-room',
+  path: '/choose-room',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChooseCategoryRoute = ChooseCategoryRouteImport.update({
   id: '/choose-category',
   path: '/choose-category',
@@ -32,35 +38,51 @@ const PlayingCategoryRoute = PlayingCategoryRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/choose-category': typeof ChooseCategoryRoute
+  '/choose-room': typeof ChooseRoomRoute
   '/playing/$category': typeof PlayingCategoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/choose-category': typeof ChooseCategoryRoute
+  '/choose-room': typeof ChooseRoomRoute
   '/playing/$category': typeof PlayingCategoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/choose-category': typeof ChooseCategoryRoute
+  '/choose-room': typeof ChooseRoomRoute
   '/playing/$category': typeof PlayingCategoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/choose-category' | '/playing/$category'
+  fullPaths: '/' | '/choose-category' | '/choose-room' | '/playing/$category'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/choose-category' | '/playing/$category'
-  id: '__root__' | '/' | '/choose-category' | '/playing/$category'
+  to: '/' | '/choose-category' | '/choose-room' | '/playing/$category'
+  id:
+    | '__root__'
+    | '/'
+    | '/choose-category'
+    | '/choose-room'
+    | '/playing/$category'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChooseCategoryRoute: typeof ChooseCategoryRoute
+  ChooseRoomRoute: typeof ChooseRoomRoute
   PlayingCategoryRoute: typeof PlayingCategoryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/choose-room': {
+      id: '/choose-room'
+      path: '/choose-room'
+      fullPath: '/choose-room'
+      preLoaderRoute: typeof ChooseRoomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/choose-category': {
       id: '/choose-category'
       path: '/choose-category'
@@ -88,6 +110,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChooseCategoryRoute: ChooseCategoryRoute,
+  ChooseRoomRoute: ChooseRoomRoute,
   PlayingCategoryRoute: PlayingCategoryRoute,
 }
 export const routeTree = rootRouteImport

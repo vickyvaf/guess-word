@@ -52,7 +52,7 @@ function Home() {
       </p>
       <Button
         onClick={() => {
-          navigate({ to: '/choose-category' })
+          navigate({ to: '/choose-room' })
         }}
       >
         Play
