@@ -29,7 +29,7 @@ export function Modal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.35)",
+        background: "var(--modal-overlay)",
         display: "grid",
         placeItems: "center",
         zIndex: 50,
@@ -39,12 +39,12 @@ export function Modal({
       <div
         style={{
           width: "min(90vw, 560px)",
-          background: "white",
-          border: "3px solid black",
+          background: "var(--modal-bg)",
+          border: "3px solid var(--modal-border)",
           borderRadius: "1rem",
-          boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
+          boxShadow: "8px 8px 0 var(--modal-shadow)",
           padding: "1rem 1.25rem",
-          color: "#213547",
+          color: "var(--modal-text)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -64,11 +64,11 @@ export function Modal({
             aria-label="Close"
             style={{
               cursor: "pointer",
-              border: "2px solid black",
-              background: "white",
+              border: "2px solid var(--modal-border)",
+              background: "var(--modal-bg)",
               borderRadius: "0.5rem",
               padding: "0.25rem 0.5rem",
-              boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
+              boxShadow: "3px 3px 0 var(--modal-shadow)",
               fontSize: "1.25rem",
             }}
           >

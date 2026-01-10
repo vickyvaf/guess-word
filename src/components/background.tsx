@@ -7,12 +7,14 @@ export function MathGridBg({
   cell?: number;
   major?: number;
 }) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(window.location.pathname !== "/");
 
   useEffect(() => {
-    // trigger animasi ketika pertama kali render
-    const t = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(t);
+    // Only run on root page ("/")
+    if (window.location.pathname === "/") {
+      const t = setTimeout(() => setVisible(true), 100);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   const style = {

@@ -12,6 +12,29 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
+  /* Input colors for dark mode */
+  --input-bg: #1a1a1a;
+  --input-border: #666;
+  --input-border-focus: #aaa;
+  --input-text: rgba(255, 255, 255, 0.87);
+  --input-shadow: rgba(255, 255, 255, 0.1);
+
+  /* Button colors for dark mode */
+  --button-bg: #1a1a1a;
+  --button-border: #888;
+  --button-text: rgba(255, 255, 255, 0.87);
+  --button-shadow: rgba(255, 255, 255, 0.1);
+  --button-disabled-bg: #2a2a2a;
+  --button-disabled-border: #555;
+  --button-disabled-text: rgba(255, 255, 255, 0.4);
+
+  /* Modal colors for dark mode */
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+  --modal-bg: #1a1a1a;
+  --modal-border: #888;
+  --modal-text: rgba(255, 255, 255, 0.87);
+  --modal-shadow: rgba(255, 255, 255, 0.15);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -29,11 +52,31 @@ body {
   :root {
     color: #213547;
     background-color: #ffffff;
+    
+    /* Input colors for light mode */
+    --input-bg: #ffffff;
+    --input-border: #999;
+    --input-border-focus: #000;
+    --input-text: #213547;
+    --input-shadow: rgba(0, 0, 0, 0.2);
+
+    /* Button colors for light mode */
+    --button-bg: #ffffff;
+    --button-border: #000;
+    --button-text: #213547;
+    --button-shadow: rgba(0, 0, 0, 0.2);
+    --button-disabled-bg: #f5f5f5;
+    --button-disabled-border: #999;
+    --button-disabled-text: rgba(33, 53, 71, 0.5);
+
+    /* Modal colors for light mode */
+    --modal-overlay: rgba(0, 0, 0, 0.35);
+    --modal-bg: #ffffff;
+    --modal-border: #000;
+    --modal-text: #213547;
+    --modal-shadow: rgba(0, 0, 0, 0.25);
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
