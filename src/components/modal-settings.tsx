@@ -27,15 +27,77 @@ export function ModalSettings() {
         return "User";
     };
 
+    const renderButtonIcon = () => {
+        if (loading) {
+            return <SettingsIcon width={40} height={40} />;
+        }
+        
+        if (user) {
+            return (
+                <div
+                    style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: "50%",
+                        border: "3px solid black",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                        display: "grid",
+                        placeItems: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                        background: user.user_metadata?.avatar_url 
+                            ? `url(${user.user_metadata.avatar_url}) center/cover no-repeat`
+                            : "#3b82f6",
+                    }}
+                    title={getUserDisplayName()}
+                >
+                    {/* White inner ring */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            width: "calc(100% - 6px)",
+                            height: "calc(100% - 6px)",
+                            borderRadius: "50%",
+                            border: "2px solid white",
+                            pointerEvents: "none",
+                            zIndex: 1,
+                        }}
+                    />
+                    {/* Initials or avatar content */}
+                    {!user.user_metadata?.avatar_url && (
+                        <span
+                            style={{
+                                fontWeight: 700,
+                                fontSize: "1.1rem",
+                                color: "white",
+                                zIndex: 2,
+                                position: "relative",
+                            }}
+                        >
+                            {getUserInitials(user.email)}
+                        </span>
+                    )}
+                </div>
+            );
+        }
+        
+        return <SettingsIcon width={40} height={40} />;
+    };
+
     return <>
         <Button onClick={() => setIsOpen(true)}
             rounded={true}
             style={{
-                position: "absolute", top: 20, right: 20,
+                position: "absolute", 
+                top: 20, 
+                right: 20,
                 height: 64,
                 width: 64,
+                padding: 0,
+                display: "grid",
+                placeItems: "center",
             }}
-            icon={<SettingsIcon width={40} height={40} />} />
+            icon={renderButtonIcon()} />
 
         {isOpen ? (
             <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Settings">

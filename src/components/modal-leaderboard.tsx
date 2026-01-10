@@ -3,7 +3,7 @@ import { Button } from "@/uikits/button";
 import { Modal } from "@/uikits/modal";
 import { Trophy } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase/supabase";
 
 interface LeaderboardEntry {
   id: string;
