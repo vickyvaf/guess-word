@@ -1,5 +1,6 @@
 # Preview
 <img width="1440" height="813" alt="Screenshot 2025-09-13 at 19 41 50" src="https://github.com/user-attachments/assets/4cd7f90f-c061-43bb-8140-a1ae12b823af" />
+<img width="1440" height="811" alt="Screenshot 2026-01-10 at 16 48 53" src="https://github.com/user-attachments/assets/4b4a39a2-a8bf-4ca5-b971-bfbdbccb8241" />
 
 
 # React + TypeScript + Vite
