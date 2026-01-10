@@ -140,7 +140,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   // Sign in with Google
   const signInWithGoogle = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}${window.location.pathname}`,
