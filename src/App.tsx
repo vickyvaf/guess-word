@@ -1,36 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { MathGridBg } from "./components/background";
-import { ChooseCategory } from "./components/choose-category";
-import { ModalSettings } from "./components/modal-settings";
-import { PlayingField } from "./components/playing";
-import { Button } from "./uikits/button";
-import { useSettings } from "./contexts/SettingsContext";
-import { ModalLeaderboard } from "./components/modal-leaderboard";
+import { useState } from "react";
+import { MathGridBg } from "@/components/background";
+import { ChooseCategory } from "@/components/choose-category";
+import { ModalLeaderboard } from "@/components/modal-leaderboard";
+import { ModalSettings } from "@/components/modal-settings";
+import { PlayingField } from "@/components/playing";
+import { Button } from "@/uikits/button";
 
 function App() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { volume } = useSettings();
-
   const [showContent, setShowContent] = useState("welcome");
   const [categorySelected, setCategorySelected] = useState("");
-
-  // Initialize sound effects audio
-  useEffect(() => {
-    audioRef.current = new Audio("/casual-click-pop-ui.mp3");
-  }, []);
-
-  // Apply volume from settings
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
-    }
-  }, [volume]);
-
-  const playSound = () => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = 0;
-    audioRef.current.play();
-  };
 
   return (
     <div

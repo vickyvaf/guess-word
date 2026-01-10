@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Button } from "../uikits/button";
-import { Modal } from "../uikits/modal";
+import { Button } from "@/uikits/button";
+import { Modal } from "@/uikits/modal";
 import { Trophy } from "lucide-react";
-import { useSettings } from "../contexts/SettingsContext";
-import { supabase } from "../lib/supabase";
+import { useSettings } from "@/contexts/SettingsContext";
+import { supabase } from "@/lib/supabase";
 
 interface LeaderboardEntry {
   id: string;

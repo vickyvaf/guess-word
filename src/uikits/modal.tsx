@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Button } from "./button";
+import { Button } from "@/uikits/button";
 
 export function Modal({
   open,

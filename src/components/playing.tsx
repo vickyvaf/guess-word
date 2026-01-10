@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import data from "../data.json";
-import { Button } from "../uikits/button";
-import { HealthPoint } from "./health-point";
-import { useSettings } from "../contexts/SettingsContext";
-import { addToLeaderboard } from "./modal-leaderboard";
+import data from "@/data.json";
+import { Button } from "@/uikits/button";
+import { HealthPoint } from "@/components/health-point";
+import { useSettings } from "@/contexts/SettingsContext";
+import { addToLeaderboard } from "@/components/modal-leaderboard";
 
 const MAX_HEALTH = 5;
 const TOTAL = 5;

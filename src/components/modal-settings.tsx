@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "../uikits/button";
-import { Modal } from "../uikits/modal";
+import { Button } from "@/uikits/button";
+import { Modal } from "@/uikits/modal";
 import { SettingsIcon } from "lucide-react";
-import { useSettings } from "../contexts/SettingsContext";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export function ModalSettings() {
     const [isOpen, setIsOpen] = useState(false);

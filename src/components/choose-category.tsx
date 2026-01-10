@@ -1,4 +1,4 @@
-import { Button } from "../uikits/button";
+import { Button } from "@/uikits/button";
 
 export function ChooseCategory({
   onClick,
