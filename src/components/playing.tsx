@@ -3,7 +3,6 @@ import data from "@/data.json";
 import { Button } from "@/uikits/button";
 import { HealthPoint } from "@/components/health-point";
 import { useSettings } from "@/contexts/SettingsContext";
-import { addToLeaderboard } from "@/components/modal-leaderboard";
 
 const MAX_HEALTH = 5;
 const TOTAL = 5;
@@ -86,22 +85,6 @@ export function PlayingField({
 
   // 🏆 Menang saat completed == TOTAL
   const isWin = completed >= TOTAL;
-
-  // Save to leaderboard when game is won (only once)
-  useEffect(() => {
-    if (isWin && completed === TOTAL && !hasSavedScore.current) {
-      hasSavedScore.current = true;
-      addToLeaderboard(
-        "Player", // This will be replaced by user data from auth
-        completed,
-        categorySelected,
-        health
-      ).catch((error) => {
-        console.error("Error saving to leaderboard:", error);
-        hasSavedScore.current = false; // Reset on error so user can try again
-      });
-    }
-  }, [isWin, completed, categorySelected, health]);
 
   // Jika solved → naikkan completed, lalu:
   // - jika sudah mencapai TOTAL, TIDAK lanjut ke soal berikutnya

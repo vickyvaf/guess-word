@@ -1,10 +1,16 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export function Input({ onFocus, onBlur, style, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
     const inputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        if (props.autoFocus && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [props.autoFocus]);
+
     return (
-        <input 
+        <input
             ref={inputRef}
             style={{
                 border: "4px solid var(--input-border)",
@@ -33,7 +39,7 @@ export function Input({ onFocus, onBlur, style, ...props }: React.InputHTMLAttri
                 }
                 onBlur?.(e);
             }}
-            {...props} 
+            {...props}
         />
     )
 }

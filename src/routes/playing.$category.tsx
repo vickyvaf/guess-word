@@ -1,198 +1,187 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState, useRef } from 'react'
-import data from '@/data.json'
-import { Button } from '@/uikits/button'
-import { HealthPoint } from '@/components/health-point'
-import { useSettings } from '@/contexts/SettingsContext'
-import { addToLeaderboard } from '@/components/modal-leaderboard'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState, useRef } from "react";
+import data from "@/data.json";
+import { Button } from "@/uikits/button";
+import { HealthPoint } from "@/components/health-point";
+import { useSettings } from "@/contexts/SettingsContext";
 
-const MAX_HEALTH = 5
-const TOTAL = 5
+const MAX_HEALTH = 5;
+const TOTAL = 5;
 
-export const Route = createFileRoute('/playing/$category')({
+export const Route = createFileRoute("/playing/$category")({
   component: PlayingPage,
-})
+});
 
 function PlayingPage() {
-  const { category } = Route.useParams()
-  const navigate = useNavigate()
-  const { volume } = useSettings()
-  const [completed, setCompleted] = useState(0)
-  const [countdown, setCountdown] = useState(3)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [guessed, setGuessed] = useState<string[]>([])
-  const [health, setHealth] = useState(MAX_HEALTH)
-  const hasSavedScore = useRef(false)
+  const { category } = Route.useParams();
+  const navigate = useNavigate();
+  const { volume } = useSettings();
+  const [completed, setCompleted] = useState(0);
+  const [countdown, setCountdown] = useState(3);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [guessed, setGuessed] = useState<string[]>([]);
+  const [health, setHealth] = useState(MAX_HEALTH);
+  const hasSavedScore = useRef(false);
 
   // @ts-ignore
-  const questions = data?.[category] || []
+  const questions = data?.[category] || [];
 
   useEffect(() => {
     if (questions.length > 0) {
-      setCurrentQuestionIndex(Math.floor(Math.random() * questions.length))
-      setGuessed([])
-      setHealth(MAX_HEALTH)
-      setCountdown(3)
-      setCompleted(0)
-      hasSavedScore.current = false
+      setCurrentQuestionIndex(Math.floor(Math.random() * questions.length));
+      setGuessed([]);
+      setHealth(MAX_HEALTH);
+      setCountdown(3);
+      setCompleted(0);
+      hasSavedScore.current = false;
     }
-  }, [category, questions.length])
+  }, [category, questions.length]);
 
-  const currentQuestion = questions[currentQuestionIndex]
+  const currentQuestion = questions[currentQuestionIndex];
 
   const answerChars: string[] = useMemo(
-    () => (currentQuestion?.answer ?? '').toUpperCase().split(''),
+    () => (currentQuestion?.answer ?? "").toUpperCase().split(""),
     [currentQuestion]
-  )
+  );
 
   const isSolved = useMemo(() => {
-    const alphaChars = answerChars.filter((ch) => /[A-Z]/.test(ch))
-    if (alphaChars.length === 0) return false
-    return alphaChars.every((ch) => guessed.includes(ch))
-  }, [answerChars, guessed])
+    const alphaChars = answerChars.filter((ch) => /[A-Z]/.test(ch));
+    if (alphaChars.length === 0) return false;
+    return alphaChars.every((ch) => guessed.includes(ch));
+  }, [answerChars, guessed]);
 
   useEffect(() => {
-    if (countdown <= 0) return
-    const interval = setInterval(() => setCountdown((c) => c - 1), 1000)
-    return () => clearInterval(interval)
-  }, [countdown])
+    if (countdown <= 0) return;
+    const interval = setInterval(() => setCountdown((c) => c - 1), 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
 
   const handleGuess = (letter: string) => {
-    const L = letter.toUpperCase()
-    if (guessed.includes(L) || health <= 0) return
-    if (isWin) return
+    const L = letter.toUpperCase();
+    if (guessed.includes(L) || health <= 0) return;
+    if (isWin) return;
 
-    setGuessed((g) => [...g, L])
+    setGuessed((g) => [...g, L]);
 
-    const isCorrect = answerChars.includes(L)
-    if (!isCorrect) setHealth((h) => Math.max(0, h - 1))
+    const isCorrect = answerChars.includes(L);
+    if (!isCorrect) setHealth((h) => Math.max(0, h - 1));
 
     try {
-      const a = new Audio('/casual-click-pop-ui.mp3')
-      a.volume = (volume / 100) * 0.6
-      a.play()
+      const a = new Audio("/casual-click-pop-ui.mp3");
+      a.volume = (volume / 100) * 0.6;
+      a.play();
     } catch {}
-  }
+  };
 
   useEffect(() => {
-    if (countdown > 0) return
+    if (countdown > 0) return;
     const onKey = (e: KeyboardEvent) => {
-      const key = e.key.toUpperCase()
-      if (/^[A-Z]$/.test(key)) handleGuess(key)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+      const key = e.key.toUpperCase();
+      if (/^[A-Z]$/.test(key)) handleGuess(key);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, guessed, health, answerChars])
+  }, [countdown, guessed, health, answerChars]);
 
-  const isWin = completed >= TOTAL
-
-  useEffect(() => {
-    if (isWin && completed === TOTAL && !hasSavedScore.current) {
-      hasSavedScore.current = true
-      addToLeaderboard('Player', completed, category, health).catch((error) => {
-        console.error('Error saving to leaderboard:', error)
-        hasSavedScore.current = false
-      })
-    }
-  }, [isWin, completed, category, health])
+  const isWin = completed >= TOTAL;
 
   useEffect(() => {
-    if (!isSolved || isWin) return
+    if (!isSolved || isWin) return;
 
     try {
-      const s = new Audio('/success-quiz.mp3')
-      s.volume = (volume / 100) * 0.7
-      s.play()
+      const s = new Audio("/success-quiz.mp3");
+      s.volume = (volume / 100) * 0.7;
+      s.play();
     } catch {}
 
     setCompleted((c) => {
-      const nextC = Math.min(TOTAL, c + 1)
+      const nextC = Math.min(TOTAL, c + 1);
       if (nextC >= TOTAL) {
-        return nextC
+        return nextC;
       }
 
-      const len = Math.max(1, questions.length)
-      let next = Math.floor(Math.random() * len)
-      if (len > 1 && next === currentQuestionIndex) next = (next + 1) % len
-      setCurrentQuestionIndex(next)
-      setGuessed([])
-      return nextC
-    })
+      const len = Math.max(1, questions.length);
+      let next = Math.floor(Math.random() * len);
+      if (len > 1 && next === currentQuestionIndex) next = (next + 1) % len;
+      setCurrentQuestionIndex(next);
+      setGuessed([]);
+      return nextC;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSolved, questions.length])
+  }, [isSolved, questions.length]);
 
-  const isGameOver = health <= 0
-  const backToMenu = () => navigate({ to: '/choose-category' })
+  const isGameOver = health <= 0;
+  const backToMenu = () => navigate({ to: "/choose-category" });
 
   if (!currentQuestion) {
     return (
       <div
         style={{
-          display: 'grid',
-          placeItems: 'center',
-          width: '100vw',
-          height: '100vh',
-          fontSize: '2rem',
-          fontWeight: 'bold',
+          display: "grid",
+          placeItems: "center",
+          width: "100vw",
+          height: "100vh",
+          fontSize: "2rem",
+          fontWeight: "bold",
         }}
       >
         No question found.
       </div>
-    )
+    );
   }
 
   if (countdown > 0) {
     return (
       <div
         style={{
-          position: 'absolute',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100vw',
-          height: '100vh',
-          fontWeight: 'bold',
-          textAlign: 'center',
+          position: "absolute",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100vw",
+          height: "100vh",
+          fontWeight: "bold",
+          textAlign: "center",
         }}
       >
-        <h1 style={{ margin: 0, fontSize: '3rem' }}>
+        <h1 style={{ margin: 0, fontSize: "3rem" }}>
           Get ready, the game begins in
         </h1>
-        <h1 style={{ margin: 0, fontSize: '8rem' }}>{countdown}</h1>
+        <h1 style={{ margin: 0, fontSize: "8rem" }}>{countdown}</h1>
       </div>
-    )
+    );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       <div
         style={{
-          width: '100vw',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6rem',
-          padding: '2rem 1rem',
-          position: 'relative',
+          width: "100vw",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "6rem",
+          padding: "2rem 1rem",
+          position: "relative",
         }}
       >
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 16,
             left: 16,
-            border: '3px solid black',
-            borderRadius: '0.75rem',
-            padding: '0.4rem 0.75rem',
-            background: 'white',
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.2)',
+            border: "3px solid black",
+            borderRadius: "0.75rem",
+            padding: "0.4rem 0.75rem",
+            background: "white",
+            boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
             fontWeight: 900,
-            userSelect: 'none',
-            fontSize: '1.5rem',
+            userSelect: "none",
+            fontSize: "1.5rem",
           }}
         >
           Completed {completed}/{TOTAL}
@@ -203,81 +192,81 @@ function PlayingPage() {
         <div>
           <div
             style={{
-              fontWeight: 'bold',
-              userSelect: 'none',
-              textAlign: 'center',
-              fontSize: '3rem',
-              maxWidth: '90vw',
-              marginBottom: '2rem',
+              fontWeight: "bold",
+              userSelect: "none",
+              textAlign: "center",
+              fontSize: "3rem",
+              maxWidth: "90vw",
+              marginBottom: "2rem",
             }}
           >
             {currentQuestion.clue}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             {answerChars.map((letter, index) => {
-              const isAlpha = /[A-Z]/.test(letter)
-              const show = !isAlpha || guessed.includes(letter)
+              const isAlpha = /[A-Z]/.test(letter);
+              const show = !isAlpha || guessed.includes(letter);
               return (
                 <span
                   key={`${letter}-${index}`}
                   style={{
-                    display: 'inline-block',
-                    width: '3rem',
-                    height: '60px',
-                    lineHeight: '3rem',
-                    borderBottom: isAlpha ? '3px solid black' : '0',
-                    margin: '0 0.2rem',
-                    textAlign: 'center',
-                    fontSize: '4rem',
+                    display: "inline-block",
+                    width: "3rem",
+                    height: "60px",
+                    lineHeight: "3rem",
+                    borderBottom: isAlpha ? "3px solid black" : "0",
+                    margin: "0 0.2rem",
+                    textAlign: "center",
+                    fontSize: "4rem",
                     fontWeight: 700,
-                    letterSpacing: '1px',
+                    letterSpacing: "1px",
                   }}
                 >
-                  {show ? letter : ''}
+                  {show ? letter : ""}
                 </span>
-              )
+              );
             })}
           </div>
         </div>
 
         <div
           aria-label="Keyboard"
-          style={{ display: 'grid', gap: '0.6rem', userSelect: 'none' }}
+          style={{ display: "grid", gap: "0.6rem", userSelect: "none" }}
         >
-          {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row) => (
+          {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row) => (
             <div
               key={row}
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.5rem',
+                display: "flex",
+                justifyContent: "center",
+                gap: "0.5rem",
               }}
             >
-              {row.split('').map((key) => {
-                const used = guessed.includes(key)
-                const disabled = used || isGameOver || isWin
+              {row.split("").map((key) => {
+                const used = guessed.includes(key);
+                const disabled = used || isGameOver || isWin;
                 return (
                   <Button
                     key={key}
                     onClick={() => handleGuess(key)}
                     disabled={disabled}
                     style={{
-                      border: '3px solid black',
-                      borderRadius: '0.6rem',
-                      backgroundColor: used ? '#e5e7eb' : 'white',
-                      color: used ? '#6b7280' : '#111827',
-                      boxShadow: used ? 'none' : '4px 4px 0 rgba(0,0,0,0.2)',
-                      fontSize: '2rem',
-                      padding: '1rem 2rem',
+                      border: "3px solid black",
+                      borderRadius: "0.6rem",
+                      backgroundColor: used ? "#e5e7eb" : "white",
+                      color: used ? "#6b7280" : "#111827",
+                      boxShadow: used ? "none" : "4px 4px 0 rgba(0,0,0,0.2)",
+                      fontSize: "2rem",
+                      padding: "1rem 2rem",
                       fontWeight: 800,
-                      cursor: disabled ? 'not-allowed' : 'pointer',
-                      transition: 'transform 0.08s ease',
+                      cursor: disabled ? "not-allowed" : "pointer",
+                      transition: "transform 0.08s ease",
                     }}
                   >
                     {key}
                   </Button>
-                )
+                );
               })}
             </div>
           ))}
@@ -289,30 +278,30 @@ function PlayingPage() {
             aria-modal="true"
             aria-label="Game Over"
             style={{
-              position: 'fixed',
+              position: "fixed",
               inset: 0,
-              background: 'rgba(0,0,0,0.35)',
-              display: 'grid',
-              placeItems: 'center',
+              background: "rgba(0,0,0,0.35)",
+              display: "grid",
+              placeItems: "center",
               zIndex: 50,
             }}
           >
             <div
               style={{
-                width: 'min(90vw, 560px)',
-                background: 'white',
-                border: '3px solid black',
-                borderRadius: '1rem',
-                boxShadow: '8px 8px 0 rgba(0,0,0,0.25)',
-                padding: '1.25rem 1.25rem 1rem',
-                color: '#111827',
-                textAlign: 'center',
+                width: "min(90vw, 560px)",
+                background: "white",
+                border: "3px solid black",
+                borderRadius: "1rem",
+                boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
+                padding: "1.25rem 1.25rem 1rem",
+                color: "#111827",
+                textAlign: "center",
               }}
             >
               <h2
                 style={{
                   margin: 0,
-                  fontSize: '2.5rem',
+                  fontSize: "2.5rem",
                   lineHeight: 1.2,
                   fontWeight: 900,
                 }}
@@ -322,8 +311,8 @@ function PlayingPage() {
               <img src="/dead.png" width={200} height={200} />
               <p
                 style={{
-                  margin: '0.75rem 0 0',
-                  fontSize: '1.1rem',
+                  margin: "0.75rem 0 0",
+                  fontSize: "1.1rem",
                   fontWeight: 600,
                 }}
               >
@@ -331,34 +320,34 @@ function PlayingPage() {
               </p>
               <div
                 style={{
-                  marginTop: '0.25rem',
-                  fontSize: '2rem',
+                  marginTop: "0.25rem",
+                  fontSize: "2rem",
                   fontWeight: 900,
-                  letterSpacing: '1px',
+                  letterSpacing: "1px",
                 }}
               >
-                {currentQuestion.answer?.toUpperCase?.() ?? ''}
+                {currentQuestion.answer?.toUpperCase?.() ?? ""}
               </div>
               <div
                 style={{
-                  marginTop: '1rem',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '0.75rem',
+                  marginTop: "1rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.75rem",
                 }}
               >
                 <Button
                   onClick={backToMenu}
                   style={{
-                    border: '3px solid black',
-                    borderRadius: '0.75rem',
-                    backgroundColor: 'white',
-                    boxShadow: '4px 4px 0 rgba(0,0,0,0.2)',
-                    fontSize: '1.25rem',
-                    padding: '0.75rem 1.25rem',
+                    border: "3px solid black",
+                    borderRadius: "0.75rem",
+                    backgroundColor: "white",
+                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    fontSize: "1.25rem",
+                    padding: "0.75rem 1.25rem",
                     fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'transform 0.08s ease',
+                    cursor: "pointer",
+                    transition: "transform 0.08s ease",
                   }}
                 >
                   Try Again
@@ -374,30 +363,30 @@ function PlayingPage() {
             aria-modal="true"
             aria-label="Congratulations"
             style={{
-              position: 'fixed',
+              position: "fixed",
               inset: 0,
-              background: 'rgba(0,0,0,0.35)',
-              display: 'grid',
-              placeItems: 'center',
+              background: "rgba(0,0,0,0.35)",
+              display: "grid",
+              placeItems: "center",
               zIndex: 60,
             }}
           >
             <div
               style={{
-                width: 'min(90vw, 600px)',
-                background: 'white',
-                border: '3px solid black',
-                borderRadius: '1rem',
-                boxShadow: '8px 8px 0 rgba(0,0,0,0.25)',
-                padding: '1.25rem 1.25rem 1.25rem',
-                color: '#111827',
-                textAlign: 'center',
+                width: "min(90vw, 600px)",
+                background: "white",
+                border: "3px solid black",
+                borderRadius: "1rem",
+                boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
+                padding: "1.25rem 1.25rem 1.25rem",
+                color: "#111827",
+                textAlign: "center",
               }}
             >
               <h2
                 style={{
                   margin: 0,
-                  fontSize: '2.5rem',
+                  fontSize: "2.5rem",
                   lineHeight: 1.2,
                   fontWeight: 900,
                   marginBottom: 40,
@@ -408,66 +397,66 @@ function PlayingPage() {
               <img
                 src="/trophy.png"
                 style={{
-                  margin: '1rem',
+                  margin: "1rem",
                 }}
                 width={200}
                 height={200}
               />
               <p
                 style={{
-                  margin: '0.75rem 0 0',
-                  fontSize: '1.5rem',
+                  margin: "0.75rem 0 0",
+                  fontSize: "1.5rem",
                   fontWeight: 600,
                 }}
               >
-                You completed {TOTAL} questions in{' '}
+                You completed {TOTAL} questions in{" "}
                 <span style={{ fontWeight: 900 }}>{category}</span>!
               </p>
 
               <div
                 style={{
-                  marginTop: '1rem',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '0.75rem',
+                  marginTop: "1rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.75rem",
                 }}
               >
                 <Button
                   onClick={backToMenu}
                   style={{
-                    border: '3px solid black',
-                    borderRadius: '0.75rem',
-                    backgroundColor: 'white',
-                    boxShadow: '4px 4px 0 rgba(0,0,0,0.2)',
-                    fontSize: '1.1rem',
-                    padding: '0.75rem 1.25rem',
+                    border: "3px solid black",
+                    borderRadius: "0.75rem",
+                    backgroundColor: "white",
+                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    fontSize: "1.1rem",
+                    padding: "0.75rem 1.25rem",
                     fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'transform 0.08s ease',
+                    cursor: "pointer",
+                    transition: "transform 0.08s ease",
                   }}
                 >
                   Back to Menu
                 </Button>
                 <Button
                   onClick={() => {
-                    setCompleted(0)
-                    setGuessed([])
-                    setHealth(MAX_HEALTH)
-                    const len = Math.max(1, questions.length)
-                    setCurrentQuestionIndex(Math.floor(Math.random() * len))
-                    setCountdown(3)
-                    hasSavedScore.current = false
+                    setCompleted(0);
+                    setGuessed([]);
+                    setHealth(MAX_HEALTH);
+                    const len = Math.max(1, questions.length);
+                    setCurrentQuestionIndex(Math.floor(Math.random() * len));
+                    setCountdown(3);
+                    hasSavedScore.current = false;
                   }}
                   style={{
-                    border: '3px solid black',
-                    borderRadius: '0.75rem',
-                    backgroundColor: 'white',
-                    boxShadow: '4px 4px 0 rgba(0,0,0,0.2)',
-                    fontSize: '1.1rem',
-                    padding: '0.75rem 1.25rem',
+                    border: "3px solid black",
+                    borderRadius: "0.75rem",
+                    backgroundColor: "white",
+                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    fontSize: "1.1rem",
+                    padding: "0.75rem 1.25rem",
                     fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'transform 0.08s ease',
+                    cursor: "pointer",
+                    transition: "transform 0.08s ease",
                   }}
                 >
                   Play Again
@@ -478,5 +467,5 @@ function PlayingPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

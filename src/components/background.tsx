@@ -10,7 +10,6 @@ export function MathGridBg({
   const [visible, setVisible] = useState(window.location.pathname !== "/");
 
   useEffect(() => {
-    // Only run on root page ("/")
     if (window.location.pathname === "/") {
       const t = setTimeout(() => setVisible(true), 100);
       return () => clearTimeout(t);

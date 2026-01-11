@@ -1,112 +1,49 @@
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/uikits/button";
+import { services } from "@/supabase/services";
 import { Modal } from "@/uikits/modal";
-import { Trophy } from "lucide-react";
-import { useSettings } from "@/contexts/SettingsContext";
-import { supabase } from "@/supabase/supabase";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
-interface LeaderboardEntry {
-  id: string;
-  playerName: string;
-  score: number;
-  category: string;
-  healthRemaining: number;
-  date: string;
-  email?: string;
-  fullName?: string;
-  avatarUrl?: string;
-}
+const getRankStyle = (rank: number) => {
+  const isTop1 = rank === 1;
+  const isTop2 = rank === 2;
+  const isTop3 = rank === 3;
+
+  return {
+    fontSize: isTop1
+      ? "1.5rem"
+      : isTop2
+        ? "1.4rem"
+        : isTop3
+          ? "1.3rem"
+          : "1.25rem",
+    fontWeight: 700,
+    width: "2rem",
+    textAlign: "center" as const,
+    color: isTop1
+      ? "#FFD700"
+      : isTop2
+        ? "#C0C0C0"
+        : isTop3
+          ? "#CD7F32"
+          : "var(--modal-text)",
+    opacity: isTop1 || isTop2 || isTop3 ? 1 : 0.7,
+  };
+};
 
 export function ModalLeaderboard() {
   const [isOpen, setIsOpen] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const { volume } = useSettings();
-  
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    audioRef.current = new Audio("/casual-click-pop-ui.mp3");
-  }, []);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => services.users.getLeaderboards(),
+    enabled: isOpen,
+  });
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
-    }
-  }, [volume]);
-
-  const playSound = () => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = 0;
-    audioRef.current.play();
-  };
-
-  // Load leaderboard from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("leaderboard");
-    if (saved) {
-      try {
-        const entries = JSON.parse(saved) as LeaderboardEntry[];
-        // Sort by score (descending), then by date (newest first)
-        const sorted = entries.sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        });
-        setLeaderboard(sorted);
-      } catch (error) {
-        console.error("Error loading leaderboard:", error);
-      }
-    }
-  }, [isOpen]); // Reload when modal opens
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `${rank}.`;
-  };
-
-  const getUserInitials = (entry: LeaderboardEntry) => {
-    if (entry.fullName) {
-      const parts = entry.fullName.split(" ");
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-      }
-      return entry.fullName[0].toUpperCase();
-    }
-    if (entry.email) {
-      const parts = entry.email.split("@")[0].split(".");
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-      }
-      return entry.email[0].toUpperCase();
-    }
-    if (entry.playerName) {
-      const parts = entry.playerName.split(" ");
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-      }
-      return entry.playerName[0].toUpperCase();
-    }
-    return "?";
-  };
-
-  const clearLeaderboard = () => {
-    if (confirm("Are you sure you want to clear the leaderboard?")) {
-      localStorage.removeItem("leaderboard");
-      setLeaderboard([]);
-    }
-  };
+  const { data: meData } = useQuery({
+    queryKey: ["me", isOpen],
+    queryFn: () => services.users.getMe(),
+    enabled: isOpen,
+  });
 
   return (
     <>
@@ -126,242 +63,206 @@ export function ModalLeaderboard() {
         width={100}
         height={100}
         onClick={() => {
-          playSound();
           setIsOpen(true);
         }}
       />
 
       {isOpen ? (
-        <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Leaderboard">
-          {leaderboard.length === 0 ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "1rem",
-                padding: "2rem 0",
-                textAlign: "center",
-              }}
-            >
-              <Trophy width={64} height={64} style={{ opacity: 0.3 }} />
-              <p style={{ margin: 0, fontSize: "1.1rem", color: "#6b7280" }}>
-                No scores yet. Play a game to see your scores here!
-              </p>
+        <Modal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Leaderboard"
+        >
+          {error ? (
+            <div style={{ textAlign: "center", padding: "2rem", opacity: 0.7 }}>
+              Error: {error.message}
             </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          ) : null}
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+              maxHeight: "70vh", // Increased height to accommodate "Me" section
+              marginTop: "1rem",
+            }}
+          >
+            {isLoading ? (
               <div
-                style={{
-                  display: "grid",
-                  gap: "0.5rem",
-                  maxHeight: "60vh",
-                  overflowY: "auto",
-                  paddingRight: "0.5rem",
-                }}
+                style={{ textAlign: "center", padding: "2rem", opacity: 0.7 }}
               >
-                {leaderboard.slice(0, 10).map((entry, index) => (
+                Loading scores...
+              </div>
+            ) : !data?.users?.length ? (
+              <div
+                style={{ textAlign: "center", padding: "2rem", opacity: 0.7 }}
+              >
+                No players found
+              </div>
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                    overflowY: "auto",
+                    flex: 1, // Allow list to take available space
+                  }}
+                >
+                  {data.users.map((user, index) => {
+                    const rank = index + 1;
+
+                    return (
+                      <div
+                        key={user.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "0.75rem 1rem",
+                          background: "var(--input-bg)",
+                          border: "2px solid var(--input-border)",
+                          borderRadius: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1rem",
+                            flex: 1,
+                          }}
+                        >
+                          <span style={getRankStyle(rank)}>{rank}</span>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.75rem",
+                            }}
+                          >
+                            <img
+                              src={user.avatar_url || "/default-avatar.jpg"}
+                              alt={user.full_name}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                                border: "2px solid var(--input-border)",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  user.full_name
+                                )}&background=random`;
+                              }}
+                            />
+                            <span style={{ fontWeight: 500, fontSize: "1rem" }}>
+                              {user.full_name}
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            fontSize: "1.1rem",
+                            color: "var(--button-text)",
+                            background: "var(--button-shadow)",
+                            padding: "0.25rem 0.75rem",
+                            borderRadius: "20px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {user.total_points || 0} pts
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {meData?.user && (
                   <div
-                    key={entry.id}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "1rem",
-                      padding: "0.75rem",
-                      border: "2px solid black",
-                      borderRadius: "0.5rem",
-                      background:
-                        index === 0
-                          ? "#fef3c7"
-                          : index === 1
-                          ? "#e5e7eb"
-                          : index === 2
-                          ? "#fed7aa"
-                          : "white",
-                      boxShadow: "2px 2px 0 rgba(0,0,0,0.1)",
+                      borderTop: "1px solid var(--input-border)",
+                      paddingTop: "1rem",
+                      marginTop: "0.5rem",
                     }}
                   >
                     <div
                       style={{
-                        fontSize: "1.5rem",
-                        fontWeight: 700,
-                        minWidth: "2.5rem",
-                        textAlign: "center",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "0.75rem 1rem",
+                        background: "var(--button-bg)", // Slightly different bg to highlight
+                        border: "2px solid var(--input-border-focus)", // Highlight border
+                        borderRadius: "12px",
                       }}
                     >
-                      {getRankIcon(index + 1)}
-                    </div>
-                    <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: "50%",
-                        border: "2px solid black",
-                        background: entry.avatarUrl
-                          ? `url(${entry.avatarUrl}) center/cover`
-                          : "#3b82f6",
-                        flexShrink: 0,
-                        display: "grid",
-                        placeItems: "center",
-                        fontWeight: 700,
-                        fontSize: "1rem",
-                        color: entry.avatarUrl ? "transparent" : "white",
-                      }}
-                      title={entry.fullName || entry.playerName || entry.email || "Anonymous"}
-                    >
-                      {entry.avatarUrl ? "" : getUserInitials(entry)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "1rem",
+                          flex: 1,
+                        }}
+                      >
+                        <span style={getRankStyle(meData.rank)}>
+                          {meData.rank}
+                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.75rem",
+                          }}
+                        >
+                          <img
+                            src={
+                              meData.user.avatar_url || "/default-avatar.jpg"
+                            }
+                            alt={meData.user.full_name}
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                              border: "2px solid var(--input-border)",
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                meData.user.full_name
+                              )}&background=random`;
+                            }}
+                          />
+                          <span style={{ fontWeight: 500, fontSize: "1rem" }}>
+                            {meData.user.full_name} (Me)
+                          </span>
+                        </div>
+                      </div>
                       <div
                         style={{
                           fontWeight: 700,
                           fontSize: "1.1rem",
-                          marginBottom: "0.25rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
+                          color: "var(--button-text)",
+                          background: "var(--button-shadow)",
+                          padding: "0.25rem 0.75rem",
+                          borderRadius: "20px",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {entry.fullName || entry.playerName || entry.email?.split("@")[0] || "Anonymous"}
-                      </div>
-                      {entry.email && (
-                        <div
-                          style={{
-                            fontSize: "0.85rem",
-                            color: "#6b7280",
-                            marginBottom: "0.25rem",
-                          }}
-                        >
-                          {entry.email}
-                        </div>
-                      )}
-                      <div
-                        style={{
-                          fontSize: "0.9rem",
-                          color: "#4b5563",
-                          display: "flex",
-                          gap: "0.75rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span>
-                          <strong>Score:</strong> {entry.score}/5
-                        </span>
-                        <span>
-                          <strong>Category:</strong> {entry.category}
-                        </span>
-                        {entry.healthRemaining > 0 && (
-                          <span>
-                            <strong>Health:</strong> {entry.healthRemaining}/5
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#6b7280",
-                          marginTop: "0.25rem",
-                        }}
-                      >
-                        {formatDate(entry.date)}
+                        {meData.user.total_points || 0} pts
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {leaderboard.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginTop: "0.5rem",
-                  }}
-                >
-                  <Button
-                    onClick={clearLeaderboard}
-                    style={{
-                      fontSize: "0.9rem",
-                      padding: "0.5rem 1rem",
-                      background: "#fee2e2",
-                      border: "2px solid black",
-                      borderRadius: "0.5rem",
-                      boxShadow: "2px 2px 0 rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    Clear Leaderboard
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </Modal>
       ) : null}
     </>
   );
-}
-
-// Helper function to add a score to the leaderboard
-export async function addToLeaderboard(
-  playerName: string,
-  score: number,
-  category: string,
-  healthRemaining: number
-) {
-  try {
-    // Get user data from Supabase auth
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-      console.log(user.email);
-      console.log(user.user_metadata?.full_name);
-      console.log(user.user_metadata?.avatar_url);
-    }
-
-    const entry: LeaderboardEntry = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      playerName: user?.user_metadata?.full_name || user?.email?.split("@")[0] || playerName,
-      score,
-      category,
-      healthRemaining,
-      date: new Date().toISOString(),
-      email: user?.email || undefined,
-      fullName: user?.user_metadata?.full_name || undefined,
-      avatarUrl: user?.user_metadata?.avatar_url || undefined,
-    };
-
-    const saved = localStorage.getItem("leaderboard");
-    const entries: LeaderboardEntry[] = saved ? JSON.parse(saved) : [];
-    entries.push(entry);
-
-    // Keep only top 50 entries
-    const sorted = entries.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    localStorage.setItem("leaderboard", JSON.stringify(sorted.slice(0, 50)));
-  } catch (error) {
-    console.error("Error adding to leaderboard:", error);
-    // Fallback: save without user data if auth fails
-    const entry: LeaderboardEntry = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      playerName,
-      score,
-      category,
-      healthRemaining,
-      date: new Date().toISOString(),
-    };
-
-    const saved = localStorage.getItem("leaderboard");
-    const entries: LeaderboardEntry[] = saved ? JSON.parse(saved) : [];
-    entries.push(entry);
-
-    const sorted = entries.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    localStorage.setItem("leaderboard", JSON.stringify(sorted.slice(0, 50)));
-  }
 }

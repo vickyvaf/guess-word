@@ -9,7 +9,9 @@ export function ChooseRoomScreen() {
             <Input placeholder="Enter room name or room code"
                 style={{
                     width: "100%",
-                }} />
+                }} 
+                autoFocus={true}
+                />
         </div>
     )
 }
