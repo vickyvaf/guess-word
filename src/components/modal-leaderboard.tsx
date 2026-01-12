@@ -108,7 +108,7 @@ export function ModalLeaderboard() {
                     flexDirection: "column",
                     gap: "0.75rem",
                     overflowY: "auto",
-                    flex: 1, // Allow list to take available space
+                    flex: 1,
                   }}
                 >
                   {data.users.map((user, index) => {

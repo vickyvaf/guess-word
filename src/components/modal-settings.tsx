@@ -8,25 +8,6 @@ export function ModalSettings() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signInWithGoogle, signOut, loading } = useSettings();
 
-  const getUserInitials = (email: string | undefined) => {
-    if (!email) return "?";
-    const parts = email.split("@")[0].split(".");
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return email[0].toUpperCase();
-  };
-
-  const getUserDisplayName = () => {
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name;
-    }
-    if (user?.email) {
-      return user.email.split("@")[0];
-    }
-    return "User";
-  };
-
   const renderButtonIcon = () => {
     if (loading) {
       return <SettingsIcon width={40} height={40} />;
@@ -49,7 +30,6 @@ export function ModalSettings() {
               ? `url(${user.user_metadata.avatar_url}) center/cover no-repeat`
               : "#3b82f6",
           }}
-          title={getUserDisplayName()}
         >
           {/* White inner ring */}
           <div
@@ -74,7 +54,7 @@ export function ModalSettings() {
                 position: "relative",
               }}
             >
-              {getUserInitials(user.email)}
+              {user.user_metadata?.full_name}
             </span>
           )}
         </div>
@@ -138,11 +118,12 @@ export function ModalSettings() {
                       ? "transparent"
                       : "white",
                   }}
-                  title={getUserDisplayName()}
                 >
                   {user.user_metadata?.avatar_url
                     ? ""
-                    : getUserInitials(user.email)}
+                    : user.user_metadata?.full_name
+                      ? user.user_metadata.full_name[0]
+                      : "?"}
                 </div>
 
                 <div
@@ -153,7 +134,7 @@ export function ModalSettings() {
                   }}
                 >
                   <span style={{ fontWeight: 700 }}>
-                    {getUserDisplayName()}
+                    {user.user_metadata?.full_name}
                   </span>
                   <span style={{ fontSize: "0.9rem", color: "#4b5563" }}>
                     {user.email}
