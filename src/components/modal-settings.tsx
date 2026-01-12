@@ -43,20 +43,6 @@ export function ModalSettings() {
               zIndex: 1,
             }}
           />
-          {/* Initials or avatar content */}
-          {!user.user_metadata?.avatar_url && (
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "white",
-                zIndex: 2,
-                position: "relative",
-              }}
-            >
-              {user.user_metadata?.full_name}
-            </span>
-          )}
         </div>
       );
     }

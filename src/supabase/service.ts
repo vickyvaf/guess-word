@@ -12,13 +12,16 @@ export const services = {
       return { users: data as User[], error };
     },
     getLeaderboards: async () => {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
-        .range(0, 9)
-        .order("total_points", { ascending: false });
+        .order("total_points", { ascending: false, nullsFirst: false })
+        .range(0, 9);
 
-      return { users: data as User[], error };
+      return {
+        users: data as User[],
+        error,
+      };
     },
     getMe: async () => {
       const {

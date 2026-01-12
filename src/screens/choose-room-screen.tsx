@@ -4,7 +4,6 @@ import { Button } from "@/uikits/button";
 import { Modal } from "@/uikits/modal";
 import { useNavigate } from "@tanstack/react-router";
 
-// Mock Data
 const MOCK_ROOMS = [
   {
     id: 1,

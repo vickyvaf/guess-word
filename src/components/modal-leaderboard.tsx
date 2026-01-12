@@ -1,4 +1,4 @@
-import { services } from "@/supabase/services";
+import { services } from "@/supabase/service";
 import { Modal } from "@/uikits/modal";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
