@@ -14,3 +14,22 @@ export interface User {
   updated_at: string;
   total_points: number;
 }
+
+export interface Room {
+  id: string;
+  name: string;
+  room_code: string;
+  status: "Waiting" | "Playing" | "Finished";
+  created_at: string;
+  created_by: string;
+  host_id: string;
+  participants: number;
+  max_players: number;
+  is_private: boolean;
+}
+
+export interface RoomParticipant {
+  room_id: string;
+  user_id: string;
+  joined_at: string;
+}

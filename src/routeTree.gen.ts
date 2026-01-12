@@ -13,7 +13,6 @@ import { Route as ChooseRoomRouteImport } from './routes/choose-room'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WaitingRoomIdRouteImport } from './routes/waiting.$roomId'
 import { Route as PlayingRoomIdRouteImport } from './routes/playing.$roomId'
-import { Route as PlayingCategoryRouteImport } from './routes/playing.$category'
 
 const ChooseRoomRoute = ChooseRoomRouteImport.update({
   id: '/choose-room',
@@ -35,23 +34,16 @@ const PlayingRoomIdRoute = PlayingRoomIdRouteImport.update({
   path: '/playing/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlayingCategoryRoute = PlayingCategoryRouteImport.update({
-  id: '/playing/$category',
-  path: '/playing/$category',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/choose-room': typeof ChooseRoomRoute
-  '/playing/$category': typeof PlayingCategoryRoute
   '/playing/$roomId': typeof PlayingRoomIdRoute
   '/waiting/$roomId': typeof WaitingRoomIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/choose-room': typeof ChooseRoomRoute
-  '/playing/$category': typeof PlayingCategoryRoute
   '/playing/$roomId': typeof PlayingRoomIdRoute
   '/waiting/$roomId': typeof WaitingRoomIdRoute
 }
@@ -59,30 +51,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/choose-room': typeof ChooseRoomRoute
-  '/playing/$category': typeof PlayingCategoryRoute
   '/playing/$roomId': typeof PlayingRoomIdRoute
   '/waiting/$roomId': typeof WaitingRoomIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/choose-room'
-    | '/playing/$category'
-    | '/playing/$roomId'
-    | '/waiting/$roomId'
+  fullPaths: '/' | '/choose-room' | '/playing/$roomId' | '/waiting/$roomId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/choose-room'
-    | '/playing/$category'
-    | '/playing/$roomId'
-    | '/waiting/$roomId'
+  to: '/' | '/choose-room' | '/playing/$roomId' | '/waiting/$roomId'
   id:
     | '__root__'
     | '/'
     | '/choose-room'
-    | '/playing/$category'
     | '/playing/$roomId'
     | '/waiting/$roomId'
   fileRoutesById: FileRoutesById
@@ -90,7 +70,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChooseRoomRoute: typeof ChooseRoomRoute
-  PlayingCategoryRoute: typeof PlayingCategoryRoute
   PlayingRoomIdRoute: typeof PlayingRoomIdRoute
   WaitingRoomIdRoute: typeof WaitingRoomIdRoute
 }
@@ -125,20 +104,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayingRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/playing/$category': {
-      id: '/playing/$category'
-      path: '/playing/$category'
-      fullPath: '/playing/$category'
-      preLoaderRoute: typeof PlayingCategoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChooseRoomRoute: ChooseRoomRoute,
-  PlayingCategoryRoute: PlayingCategoryRoute,
   PlayingRoomIdRoute: PlayingRoomIdRoute,
   WaitingRoomIdRoute: WaitingRoomIdRoute,
 }

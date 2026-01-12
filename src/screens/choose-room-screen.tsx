@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/uikits/input";
 import { Button } from "@/uikits/button";
 import { Switch } from "@/uikits/switch";
 import { Modal } from "@/uikits/modal";
 import { Dices, User, Lock } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { services } from "@/supabase/service";
+import type { Room } from "@/supabase/model";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const RANDOM_ADJECTIVES = [
   "Happy",
@@ -39,63 +42,72 @@ const generateRandomName = () => {
   return `${adj} ${noun}`;
 };
 
-const MOCK_ROOMS = [
-  {
-    id: 1,
-    name: "Fun Room",
-    code: "1234",
-    participants: 2,
-    maxParticipants: 4,
-    status: "Waiting",
-  },
-  {
-    id: 2,
-    name: "Word Wizards",
-    code: "5678",
-    participants: 1,
-    maxParticipants: 4,
-    status: "Waiting",
-  },
-  {
-    id: 3,
-    name: "Guess Master",
-    code: "9012",
-    participants: 3,
-    maxParticipants: 4,
-    status: "Playing",
-  },
-];
-
 export function ChooseRoomScreen() {
   const navigate = useNavigate();
+  const { user } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(4);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [rooms, setRooms] = useState(MOCK_ROOMS);
+  const [rooms, setRooms] = useState<Room[]>([]);
 
-  const handleCreateRoom = () => {
+  useEffect(() => {
+    services.rooms.getAllRooms().then(({ rooms }) => {
+      if (rooms) setRooms(rooms);
+    });
+  }, []);
+
+  const handleCreateRoom = async () => {
     if (!newRoomName.trim()) return;
 
-    // Simulate room creation
-    const newRoom = {
-      id: Date.now(),
+    const { room, error } = await services.rooms.createRoom({
       name: newRoomName,
-      code: Math.floor(1000 + Math.random() * 9000).toString(),
+      room_code: Math.floor(1000 + Math.random() * 9000).toString(),
       participants: 1,
-      maxParticipants: maxParticipants,
+      max_players: maxParticipants,
       status: "Waiting",
-      isPrivate: isPrivate,
-    };
+      is_private: isPrivate,
+      created_by: user?.id || "anon",
+      host_id: user?.id || "anon",
+    });
 
-    setRooms([...rooms, newRoom]);
+    if (error || !room) {
+      console.error("Failed to create room", error);
+      return;
+    }
+
+    // Auto-join the creator
+    if (user?.id) {
+      await services.roomParticipants.join(room.id, user.id);
+
+      // Update participants count (should ideally be trigger based)
+      await services.rooms.updateRoom(room.id, { participants: 1 });
+    }
+
+    setRooms([room, ...rooms]);
     setNewRoomName("");
     setMaxParticipants(4);
     setIsPrivate(false);
     setIsModalOpen(false);
 
     // Navigate to waiting room
-    navigate({ to: `/waiting/${newRoom.code}` });
+    navigate({ to: `/waiting/${room.room_code}` });
+  };
+
+  const handleJoinRoom = async (room: Room) => {
+    // Optimistic check
+    if (room.participants < room.max_players && user?.id) {
+      await services.roomParticipants.join(room.id, user.id);
+
+      // Update count manually for now
+      await services.rooms.updateRoom(room.id, {
+        participants: room.participants + 1,
+      });
+      navigate({ to: `/waiting/${room.room_code}` });
+    } else if (!user?.id) {
+      // Handle anonymous or login required case if needed
+      console.warn("User must be logged in to join");
+    }
   };
 
   return (
@@ -180,7 +192,7 @@ export function ChooseRoomScreen() {
                     gap: "0.25rem",
                   }}
                 >
-                  <Lock size={12} /> {room.code}
+                  <Lock size={12} /> {room.room_code}
                 </span>
                 <span
                   style={{
@@ -211,7 +223,7 @@ export function ChooseRoomScreen() {
                 }}
               >
                 <div style={{ display: "flex", gap: "2px" }}>
-                  {[...Array(room.maxParticipants)].map((_, i) => (
+                  {[...Array(room.max_players)].map((_, i) => (
                     <User
                       key={i}
                       size={20}
@@ -227,7 +239,7 @@ export function ChooseRoomScreen() {
                   ))}
                 </div>
                 <span style={{ fontSize: "0.9rem", marginLeft: "0.5rem" }}>
-                  {room.participants}/{room.maxParticipants}
+                  {room.participants}/{room.max_players}
                 </span>
               </div>
             </div>
@@ -236,9 +248,9 @@ export function ChooseRoomScreen() {
               fontSize="1rem"
               disabled={
                 room.status === "Playing" ||
-                room.participants >= room.maxParticipants
+                room.participants >= room.max_players
               }
-              onClick={() => console.log(`Joined ${room.id}`)}
+              onClick={() => handleJoinRoom(room)}
               style={{ padding: "0.5rem 1rem" }}
             >
               {room.status === "Playing" ? "Spectate" : "Join"}
