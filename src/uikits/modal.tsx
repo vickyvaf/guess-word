@@ -38,7 +38,7 @@ export function Modal({
     >
       <div
         style={{
-          width: "min(80vw, 560px)",
+          width: "min(90vw, 560px)",
           background: "var(--modal-bg)",
           border: "3px solid var(--modal-border)",
           borderRadius: "1rem",

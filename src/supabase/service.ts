@@ -78,6 +78,16 @@ export const services = {
 
       return { room: data as Room, error };
     },
+    searchRooms: async (query: string) => {
+      const { data, error } = await supabase
+        .from("rooms")
+        .select("*")
+        .ilike("name", `%${query}%`)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      return { rooms: data as Room[], error };
+    },
     createRoom: async (room: Partial<Room>) => {
       const { data, error } = await supabase
         .from("rooms")
@@ -96,53 +106,6 @@ export const services = {
         .single();
 
       return { room: data as Room, error };
-    },
-  },
-  roomParticipants: {
-    join: async (roomId: string, userId: string) => {
-      const { error } = await supabase
-        .from("room_participants")
-        .insert({ room_id: roomId, user_id: userId });
-      return { error };
-    },
-    leave: async (roomId: string, userId: string) => {
-      const { error } = await supabase
-        .from("room_participants")
-        .delete()
-        .eq("room_id", roomId)
-        .eq("user_id", userId);
-      return { error };
-    },
-    getParticipants: async (roomId: string) => {
-      const { data, error } = await supabase
-        .from("room_participants")
-        .select("*, users(*)")
-        .eq("room_id", roomId);
-
-      // Flatten the structure to return User objects slightly enriched or just the list
-      // But typically UI wants the User profile + maybe status.
-      // For now, let's map it to a shape easier for the UI.
-      const participants = data?.map((p: any) => ({
-        ...p.users,
-        joined_at: p.joined_at,
-      })) as (User & { joined_at: string })[];
-
-      return { participants, error };
-    },
-    subscribe: (roomId: string, callback: () => void) => {
-      return supabase
-        .channel(`room_participants:${roomId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "room_participants",
-            filter: `room_id=eq.${roomId}`,
-          },
-          () => callback()
-        )
-        .subscribe();
     },
   },
 };

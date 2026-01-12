@@ -1,26 +1,17 @@
-import { Button } from "@/uikits/button";
-import { User, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useState, useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import type { Room } from "@/supabase/model";
 import { services } from "@/supabase/service";
-import type { Room, User as UserType } from "@/supabase/model";
+import { Button } from "@/uikits/button";
+import { useNavigate } from "@tanstack/react-router";
+import { Loader2, SearchX, User } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function WaitingRoomScreen() {
   const navigate = useNavigate();
   const { user } = useSettings();
   const roomCode = window.location.pathname.split("/").pop(); // Get code from URL
-  const [dots, setDots] = useState("");
   const [room, setRoom] = useState<Room | null>(null);
-  const [participants, setParticipants] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (!roomCode) return;
@@ -28,39 +19,12 @@ export function WaitingRoomScreen() {
     const fetchRoomData = async () => {
       setIsLoading(true);
       const { room } = await services.rooms.getByNameOrCode(roomCode);
-
-      if (room) {
-        setRoom(room);
-
-        // Fetch initial participants
-        const { participants } =
-          await services.roomParticipants.getParticipants(room.id);
-        if (participants) setParticipants(participants);
-      }
+      setRoom(room);
       setIsLoading(false);
     };
 
     fetchRoomData();
   }, [roomCode]);
-
-  // Realtime subscription
-  useEffect(() => {
-    if (!room) return;
-
-    const subscription = services.roomParticipants.subscribe(
-      room.id,
-      async () => {
-        // Refresh participants on any change
-        const { participants } =
-          await services.roomParticipants.getParticipants(room.id);
-        if (participants) setParticipants(participants);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [room?.id]);
 
   const handleStartGame = async () => {
     if (!room) return;
@@ -72,17 +36,7 @@ export function WaitingRoomScreen() {
     navigate({ to: `/playing/${room.room_code}` });
   };
 
-  // Use participants state for display
-  const displayedUsers = participants.map((p) => ({
-    id: p.id,
-    name: p.name || p.full_name || "Unknown",
-    avatar_url: p.avatar_url || p.picture,
-    isHost: room?.host_id === p.id,
-  }));
-
-  // Ensure current user is in the list (optimistic)?
-  // Actually, if we subscribed correctly and joined correctly, they should be in the list.
-  // But let's trust the DB list for Truth.
+  let displayedUsers: any[] = [];
 
   if (isLoading) {
     return (
@@ -108,10 +62,27 @@ export function WaitingRoomScreen() {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
+          gap: "1.5rem",
         }}
       >
-        <h1>Room not found</h1>
-        <Button onClick={() => navigate({ to: "/" })}>Go Home</Button>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1rem",
+            color: "var(--modal-text)",
+          }}
+        >
+          <SearchX size={64} className="opacity-50" />
+          <h1 style={{ margin: 0, fontSize: "2rem" }}>Room not found</h1>
+          <p className="opacity-70">
+            The code you entered might be incorrect or the room has expired.
+          </p>
+        </div>
+        <Button fontSize="1.5rem" onClick={() => navigate({ to: "/" })}>
+          Go Home
+        </Button>
       </div>
     );
   }
@@ -124,13 +95,23 @@ export function WaitingRoomScreen() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "start",
         height: "100vh",
-        padding: "1rem",
-        gap: "2rem",
+        padding: "0",
+        position: "relative",
       }}
     >
-      <div style={{ textAlign: "center" }}>
+      <div
+        style={{
+          textAlign: "center",
+          flexShrink: 0,
+          paddingTop: "6rem",
+          paddingBottom: "1rem",
+          width: "100%",
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
+        }}
+      >
         <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
           Room: {room.name || room.room_code}
         </h1>
@@ -154,18 +135,19 @@ export function WaitingRoomScreen() {
             Code: {room.room_code}
           </span>
         </div>
-        <p style={{ fontSize: "1.2rem", color: "#666", minWidth: "240px" }}>
-          Waiting for players to join{dots}
-        </p>
+        <TextWaiting />
       </div>
 
       <div
         style={{
           width: "100%",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: "1.5rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+          gap: "1rem",
           padding: "1rem",
+          flex: 1,
+          overflowY: "auto",
+          alignContent: "start",
         }}
       >
         {displayedUsers.map((u) => (
@@ -177,10 +159,11 @@ export function WaitingRoomScreen() {
               alignItems: "center",
               gap: "0.5rem",
               padding: "1rem",
-              background: "white",
-              border: "3px solid black",
+              background: "var(--input-bg)",
+              border: "3px solid var(--button-border)",
+              color: "var(--input-text)",
               borderRadius: "1rem",
-              boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+              boxShadow: "4px 4px 0 var(--button-shadow)",
               aspectRatio: "1/1",
               justifyContent: "center",
             }}
@@ -190,10 +173,9 @@ export function WaitingRoomScreen() {
                 width: "64px",
                 height: "64px",
                 borderRadius: "50%",
-                background: "#eee",
+                background: "var(--button-disabled-bg)", // Use variable
                 display: "grid",
                 placeItems: "center",
-                border: "2px solid black",
                 overflow: "hidden",
               }}
             >
@@ -222,9 +204,10 @@ export function WaitingRoomScreen() {
                 style={{
                   fontSize: "0.8rem",
                   background: "#FFD700",
+                  color: "#000", // Ensure valid contrast on gold
                   padding: "0.2rem 0.6rem",
                   borderRadius: "1rem",
-                  border: "2px solid black",
+                  border: "2px solid var(--button-border)",
                   fontWeight: "bold",
                 }}
               >
@@ -248,8 +231,8 @@ export function WaitingRoomScreen() {
               alignItems: "center",
               gap: "0.5rem",
               padding: "1rem",
-              background: "rgba(255,255,255,0.5)",
-              border: "3px dashed #ccc",
+              background: "var(--empty-slot-bg)",
+              border: "3px dashed var(--button-disabled-border)",
               borderRadius: "1rem",
               aspectRatio: "1/1",
               justifyContent: "center",
@@ -260,28 +243,66 @@ export function WaitingRoomScreen() {
                 width: "64px",
                 height: "64px",
                 borderRadius: "50%",
-                background: "rgba(0,0,0,0.05)",
+                background: "var(--button-disabled-bg)",
                 display: "grid",
                 placeItems: "center",
+                opacity: 0.5,
               }}
             >
-              <User size={32} color="#ccc" />
+              <User size={32} color="var(--button-disabled-text)" />
             </div>
-            <span style={{ color: "#999", fontWeight: "bold" }}>Empty</span>
+            <span
+              style={{
+                color: "var(--button-disabled-text)",
+                fontWeight: "bold",
+              }}
+            >
+              Empty
+            </span>
           </div>
         ))}
       </div>
 
       {/* Only Host can start the game (or if debugging without host check) */}
+
       {(!room.host_id || room.host_id === user?.id) && (
-        <Button
-          onClick={handleStartGame}
-          fontSize="1.5rem"
-          style={{ marginTop: "2rem", padding: "1rem 3rem" }}
+        <div
+          style={{
+            width: "100%",
+            padding: "1rem",
+            background: "transparent",
+            display: "flex",
+            justifyContent: "center",
+            flexShrink: 0,
+            zIndex: 10,
+          }}
         >
-          Start Game
-        </Button>
+          <Button
+            onClick={handleStartGame}
+            fontSize="1.5rem"
+            style={{ padding: "1rem 3rem", width: "100%", maxWidth: "400px" }}
+          >
+            Start Game
+          </Button>
+        </div>
       )}
     </div>
+  );
+}
+
+function TextWaiting() {
+  const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <p style={{ fontSize: "1.2rem", color: "#666", minWidth: "240px" }}>
+      Waiting for players to join{dots}
+    </p>
   );
 }

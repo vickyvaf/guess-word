@@ -1,3 +1,4 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { services } from "@/supabase/service";
 import { Modal } from "@/uikits/modal";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ const getRankStyle = (rank: number) => {
 };
 
 export function ModalLeaderboard() {
+  const { user } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
@@ -90,9 +92,77 @@ export function ModalLeaderboard() {
           >
             {isLoading ? (
               <div
-                style={{ textAlign: "center", padding: "2rem", opacity: 0.7 }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
               >
-                Loading scores...
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "0.75rem 1rem",
+                      background: "var(--input-bg)",
+                      border: "2px solid var(--input-border)",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "2rem",
+                          height: "1.5rem",
+                          borderRadius: "4px",
+                        }}
+                        className="shimmer"
+                      />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                          flex: 1,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                          }}
+                          className="shimmer"
+                        />
+                        <div
+                          style={{
+                            width: "50%",
+                            height: "1rem",
+                            borderRadius: "4px",
+                          }}
+                          className="shimmer"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: "60px",
+                        height: "1.5rem",
+                        borderRadius: "20px",
+                      }}
+                      className="shimmer"
+                    />
+                  </div>
+                ))}
               </div>
             ) : !data?.users?.length ? (
               <div
@@ -113,6 +183,8 @@ export function ModalLeaderboard() {
                 >
                   {data.users.map((user, index) => {
                     const rank = index + 1;
+
+                    console.log("user", user);
 
                     return (
                       <div
@@ -144,7 +216,11 @@ export function ModalLeaderboard() {
                             }}
                           >
                             <img
-                              src={user.avatar_url || "/default-avatar.jpg"}
+                              src={
+                                user.avatar_url ||
+                                user.picture ||
+                                "/default-avatar.jpg"
+                              }
                               alt={user.full_name}
                               style={{
                                 width: "40px",
@@ -183,7 +259,7 @@ export function ModalLeaderboard() {
                   })}
                 </div>
 
-                {meData?.user && (
+                {(meData?.user || (user && data?.users)) && (
                   <div
                     style={{
                       borderTop: "1px solid var(--input-border)",
@@ -202,60 +278,82 @@ export function ModalLeaderboard() {
                         borderRadius: "12px",
                       }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "1rem",
-                          flex: 1,
-                        }}
-                      >
-                        <span style={getRankStyle(meData.rank)}>
-                          {meData.rank}
-                        </span>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                          }}
-                        >
-                          <img
-                            src={
-                              meData.user.avatar_url || "/default-avatar.jpg"
-                            }
-                            alt={meData.user.full_name}
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                              border: "2px solid var(--input-border)",
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                meData.user.full_name
-                              )}&background=random`;
-                            }}
-                          />
-                          <span style={{ fontWeight: 500, fontSize: "1rem" }}>
-                            {meData.user.full_name} (Me)
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: "1.1rem",
-                          color: "var(--button-text)",
-                          background: "var(--button-shadow)",
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: "20px",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {meData.user.total_points || 0} pts
-                      </div>
+                      {(() => {
+                        const meInList = data?.users?.find(
+                          (u) => u.id === user?.id
+                        );
+                        const meInListRank = meInList
+                          ? data.users.indexOf(meInList) + 1
+                          : null;
+
+                        const displayMe = meInList || meData?.user;
+                        const displayRank = meInListRank || meData?.rank;
+
+                        if (!displayMe) return null;
+
+                        return (
+                          <>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1rem",
+                                flex: 1,
+                              }}
+                            >
+                              <span style={getRankStyle(displayRank || 0)}>
+                                {displayRank || "-"}
+                              </span>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.75rem",
+                                }}
+                              >
+                                <img
+                                  src={
+                                    displayMe.avatar_url ||
+                                    displayMe.picture ||
+                                    "/default-avatar.jpg"
+                                  }
+                                  alt={displayMe.full_name}
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    objectFit: "cover",
+                                    border: "2px solid var(--input-border)",
+                                  }}
+                                  onError={(e) => {
+                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                      displayMe.full_name
+                                    )}&background=random`;
+                                  }}
+                                />
+                                <span
+                                  style={{ fontWeight: 500, fontSize: "1rem" }}
+                                >
+                                  {displayMe.full_name} (Me)
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              style={{
+                                fontWeight: 700,
+                                fontSize: "1.1rem",
+                                color: "var(--button-text)",
+                                background: "var(--button-shadow)",
+                                padding: "0.25rem 0.75rem",
+                                borderRadius: "20px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {displayMe.total_points || 0} pts
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}

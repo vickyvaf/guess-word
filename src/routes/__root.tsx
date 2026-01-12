@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { MathGridBg } from "@/components/background";
 import { ModalLeaderboard } from "@/components/modal-leaderboard";
+
 import { ModalSettings } from "@/components/modal-settings";
 import { Button } from "@/uikits/button";
 import { ChevronLeft } from "lucide-react";
@@ -19,14 +20,17 @@ export const Route = createRootRoute({
       <div
         style={{
           position: "relative",
-          overflow: "hidden",
+          overflow: "auto",
           width: "100vw",
           height: "100vh",
         }}
       >
         <Outlet />
         <MathGridBg cell={30} major={30} />
-        <ModalLeaderboard />
+        {/* Hide leaderboard in waiting room */}
+        {(location.pathname === "/" ||
+          location.pathname === "/choose-room") && <ModalLeaderboard />}
+
         <ModalSettings />
 
         {location.pathname !== "/" && (

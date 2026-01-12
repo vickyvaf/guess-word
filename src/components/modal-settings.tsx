@@ -20,7 +20,6 @@ export function ModalSettings() {
             width: 48,
             height: 48,
             borderRadius: "50%",
-            border: "3px solid black",
             boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
             display: "grid",
             placeItems: "center",
@@ -30,20 +29,7 @@ export function ModalSettings() {
               ? `url(${user.user_metadata.avatar_url}) center/cover no-repeat`
               : "#3b82f6",
           }}
-        >
-          {/* White inner ring */}
-          <div
-            style={{
-              position: "absolute",
-              width: "calc(100% - 6px)",
-              height: "calc(100% - 6px)",
-              borderRadius: "50%",
-              border: "2px solid white",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          />
-        </div>
+        />
       );
     }
 

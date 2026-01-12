@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export function Input({
   onFocus,
@@ -7,12 +7,6 @@ export function Input({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (props.autoFocus && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [props.autoFocus]);
 
   return (
     <input

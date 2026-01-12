@@ -195,7 +195,9 @@ function PlayingPage() {
                     width: "3rem",
                     height: "60px",
                     lineHeight: "3rem",
-                    borderBottom: isAlpha ? "3px solid black" : "0",
+                    borderBottom: isAlpha
+                      ? "3px solid var(--input-border-focus)"
+                      : "0",
                     margin: "0 0.2rem",
                     textAlign: "center",
                     fontSize: "4rem",
@@ -232,11 +234,17 @@ function PlayingPage() {
                     onClick={() => handleGuess(key)}
                     disabled={disabled}
                     style={{
-                      border: "3px solid black",
+                      border: "3px solid var(--button-border)",
                       borderRadius: "0.6rem",
-                      backgroundColor: used ? "#e5e7eb" : "white",
-                      color: used ? "#6b7280" : "#111827",
-                      boxShadow: used ? "none" : "4px 4px 0 rgba(0,0,0,0.2)",
+                      backgroundColor: used
+                        ? "var(--button-disabled-bg)"
+                        : "var(--button-bg)",
+                      color: used
+                        ? "var(--button-disabled-text)"
+                        : "var(--button-text)",
+                      boxShadow: used
+                        ? "none"
+                        : "4px 4px 0 var(--button-shadow)",
                       fontSize: "2rem",
                       padding: "1rem 2rem",
                       fontWeight: 800,
@@ -260,7 +268,7 @@ function PlayingPage() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0,0,0,0.35)",
+              background: "var(--modal-overlay)",
               display: "grid",
               placeItems: "center",
               zIndex: 50,
@@ -269,12 +277,12 @@ function PlayingPage() {
             <div
               style={{
                 width: "min(90vw, 560px)",
-                background: "white",
-                border: "3px solid black",
+                background: "var(--modal-bg)",
+                border: "3px solid var(--modal-border)",
                 borderRadius: "1rem",
-                boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
+                boxShadow: "8px 8px 0 var(--modal-shadow)",
                 padding: "1.25rem 1.25rem 1rem",
-                color: "#111827",
+                color: "var(--modal-text)",
                 textAlign: "center",
               }}
             >
@@ -319,10 +327,11 @@ function PlayingPage() {
                 <Button
                   onClick={backToMenu}
                   style={{
-                    border: "3px solid black",
+                    border: "3px solid var(--button-border)",
                     borderRadius: "0.75rem",
-                    backgroundColor: "white",
-                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    backgroundColor: "var(--button-bg)",
+                    color: "var(--button-text)",
+                    boxShadow: "4px 4px 0 var(--button-shadow)",
                     fontSize: "1.25rem",
                     padding: "0.75rem 1.25rem",
                     fontWeight: 800,
@@ -345,7 +354,7 @@ function PlayingPage() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0,0,0,0.35)",
+              background: "var(--modal-overlay)",
               display: "grid",
               placeItems: "center",
               zIndex: 60,
@@ -354,12 +363,12 @@ function PlayingPage() {
             <div
               style={{
                 width: "min(90vw, 600px)",
-                background: "white",
-                border: "3px solid black",
+                background: "var(--modal-bg)",
+                border: "3px solid var(--modal-border)",
                 borderRadius: "1rem",
-                boxShadow: "8px 8px 0 rgba(0,0,0,0.25)",
+                boxShadow: "8px 8px 0 var(--modal-shadow)",
                 padding: "1.25rem 1.25rem 1.25rem",
-                color: "#111827",
+                color: "var(--modal-text)",
                 textAlign: "center",
               }}
             >
@@ -394,10 +403,11 @@ function PlayingPage() {
                 <Button
                   onClick={backToMenu}
                   style={{
-                    border: "3px solid black",
+                    border: "3px solid var(--button-border)",
                     borderRadius: "0.75rem",
-                    backgroundColor: "white",
-                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    backgroundColor: "var(--button-bg)",
+                    color: "var(--button-text)",
+                    boxShadow: "4px 4px 0 var(--button-shadow)",
                     fontSize: "1.1rem",
                     padding: "0.75rem 1.25rem",
                     fontWeight: 800,
@@ -418,10 +428,11 @@ function PlayingPage() {
                     hasSavedScore.current = false;
                   }}
                   style={{
-                    border: "3px solid black",
+                    border: "3px solid var(--button-border)",
                     borderRadius: "0.75rem",
-                    backgroundColor: "white",
-                    boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
+                    backgroundColor: "var(--button-bg)",
+                    color: "var(--button-text)",
+                    boxShadow: "4px 4px 0 var(--button-shadow)",
                     fontSize: "1.1rem",
                     padding: "0.75rem 1.25rem",
                     fontWeight: 800,
