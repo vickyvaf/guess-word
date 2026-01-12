@@ -4,6 +4,7 @@ import { Button } from "@/uikits/button";
 import { Switch } from "@/uikits/switch";
 import { Modal } from "@/uikits/modal";
 import { Dices, User, Lock } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
 const RANDOM_ADJECTIVES = [
   "Happy",
@@ -17,6 +18,7 @@ const RANDOM_ADJECTIVES = [
   "Calm",
   "Wild",
 ];
+
 const RANDOM_NOUNS = [
   "Panda",
   "Tiger",
@@ -65,6 +67,7 @@ const MOCK_ROOMS = [
 ];
 
 export function ChooseRoomScreen() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(4);
@@ -90,6 +93,9 @@ export function ChooseRoomScreen() {
     setMaxParticipants(4);
     setIsPrivate(false);
     setIsModalOpen(false);
+
+    // Navigate to waiting room
+    navigate({ to: `/waiting/${newRoom.code}` });
   };
 
   return (
@@ -394,7 +400,11 @@ export function ChooseRoomScreen() {
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateRoom} fontSize="1.2rem">
+            <Button
+              onClick={handleCreateRoom}
+              fontSize="1.2rem"
+              disabled={!newRoomName.trim()}
+            >
               Create
             </Button>
           </div>

@@ -108,11 +108,10 @@ function PlayingPage() {
       setGuessed([]);
       return nextC;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolved, questions.length]);
 
   const isGameOver = health <= 0;
-  const backToMenu = () => navigate({ to: "/choose-category" });
+  const backToMenu = () => navigate({ to: "/" });
 
   if (!currentQuestion) {
     return (
@@ -169,24 +168,6 @@ function PlayingPage() {
           position: "relative",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: 16,
-            left: 16,
-            border: "3px solid black",
-            borderRadius: "0.75rem",
-            padding: "0.4rem 0.75rem",
-            background: "white",
-            boxShadow: "4px 4px 0 rgba(0,0,0,0.2)",
-            fontWeight: 900,
-            userSelect: "none",
-            fontSize: "1.5rem",
-          }}
-        >
-          Completed {completed}/{TOTAL}
-        </div>
-
         <HealthPoint health={health} />
 
         <div>
@@ -402,16 +383,6 @@ function PlayingPage() {
                 width={200}
                 height={200}
               />
-              <p
-                style={{
-                  margin: "0.75rem 0 0",
-                  fontSize: "1.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                You completed {TOTAL} questions in{" "}
-                <span style={{ fontWeight: 900 }}>{category}</span>!
-              </p>
 
               <div
                 style={{

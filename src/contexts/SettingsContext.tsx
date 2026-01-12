@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
-import { supabase } from '@/supabase/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { supabase } from "@/supabase/supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 
 interface SettingsContextType {
   volume: number;
@@ -17,11 +17,11 @@ interface SettingsContextType {
   loading: boolean;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined
+);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
-
   // Auth state
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -29,14 +29,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount
   const [volume, setVolumeState] = useState(() => {
-    const saved = localStorage.getItem('volume');
-    return saved ? parseInt(saved, 10) : 50
+    const saved = localStorage.getItem("volume");
+    return saved ? parseInt(saved, 10) : 50;
   });
 
-  const [backgroundMusicVolume, setBackgroundMusicVolumeState] = useState(() => {
-    const saved = localStorage.getItem('backgroundMusicVolume');
-    return saved ? parseInt(saved, 10) : 0
-  });
+  const [backgroundMusicVolume, setBackgroundMusicVolumeState] = useState(
+    () => {
+      const saved = localStorage.getItem("backgroundMusicVolume");
+      return saved ? parseInt(saved, 10) : 30;
+    }
+  );
 
   // Initialize auth state
   useEffect(() => {
@@ -59,72 +61,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Initialize and start background music
-  useEffect(() => {
-    bgmRef.current = new Audio("/bgm.mp3");
-    bgmRef.current.loop = true;
-    bgmRef.current.volume = backgroundMusicVolume / 100;
-
-    // Try to play immediately on load
-    const playBGM = async () => {
-      if (bgmRef.current) {
-        try {
-          await bgmRef.current.play();
-        } catch (error) {
-          // Autoplay was blocked, will try on user interaction
-          console.log("Autoplay blocked, will start on user interaction");
-        }
-      }
-    };
-
-    // Try to play immediately
-    playBGM();
-
-    // Fallback: Start on first user interaction if autoplay was blocked
-    const handleUserInteraction = async () => {
-      if (bgmRef.current && bgmRef.current.paused) {
-        try {
-          await bgmRef.current.play();
-        } catch (error) {
-          // Ignore errors
-        }
-      }
-      // Remove listeners after first successful play
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-    };
-
-    // Add listeners for fallback
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-
-    return () => {
-      if (bgmRef.current) {
-        bgmRef.current.pause();
-        bgmRef.current = null;
-      }
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-    };
-  }, []);
-
   // Persist to localStorage
   useEffect(() => {
-    localStorage.setItem('volume', volume.toString());
+    localStorage.setItem("volume", volume.toString());
   }, [volume]);
 
   useEffect(() => {
-    localStorage.setItem('backgroundMusicVolume', backgroundMusicVolume.toString());
-  }, [backgroundMusicVolume]);
-
-  // Apply background music volume from settings
-  useEffect(() => {
-    if (bgmRef.current) {
-      bgmRef.current.volume = backgroundMusicVolume / 100;
-    }
+    localStorage.setItem(
+      "backgroundMusicVolume",
+      backgroundMusicVolume.toString()
+    );
   }, [backgroundMusicVolume]);
 
   const setVolume = (newVolume: number) => {
@@ -141,45 +87,56 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}${window.location.pathname}`,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            access_type: "offline",
+            prompt: "consent",
           },
         },
       });
-      
+
       if (error) {
         // Check if the error is about provider not being enabled
-        if (error.message?.includes('provider is not enabled') || 
-            error.message?.includes('validation_failed') ||
-            error.status === 400) {
+        if (
+          error.message?.includes("provider is not enabled") ||
+          error.message?.includes("validation_failed") ||
+          error.status === 400
+        ) {
           // Extract project ref from URL
-          const projectRef = supabaseUrl.split('//')[1]?.split('.')[0] || 'wtmbscadypctstzhzmvr';
+          const projectRef =
+            supabaseUrl.split("//")[1]?.split(".")[0] || "wtmbscadypctstzhzmvr";
           const dashboardUrl = `https://supabase.com/dashboard/project/${projectRef}/auth/providers`;
-          const message = 
-            'Google OAuth provider is not enabled in your Supabase project.\n\n' +
-            'To fix this:\n\n' +
-            '1. Open this link: ' + dashboardUrl + '\n' +
+          const message =
+            "Google OAuth provider is not enabled in your Supabase project.\n\n" +
+            "To fix this:\n\n" +
+            "1. Open this link: " +
+            dashboardUrl +
+            "\n" +
             '2. Find "Google" in the providers list\n' +
-            '3. Toggle it ON\n' +
-            '4. Add your Google OAuth credentials (Client ID & Secret)\n' +
-            '5. Set Redirect URL to: ' + window.location.origin + '\n\n' +
-            'Need Google OAuth credentials?\n' +
-            'Go to: https://console.cloud.google.com/apis/credentials';
-          
-          if (confirm(message + '\n\nClick OK to open the Supabase dashboard.')) {
-            window.open(dashboardUrl, '_blank');
+            "3. Toggle it ON\n" +
+            "4. Add your Google OAuth credentials (Client ID & Secret)\n" +
+            "5. Set Redirect URL to: " +
+            window.location.origin +
+            "\n\n" +
+            "Need Google OAuth credentials?\n" +
+            "Go to: https://console.cloud.google.com/apis/credentials";
+
+          if (
+            confirm(message + "\n\nClick OK to open the Supabase dashboard.")
+          ) {
+            window.open(dashboardUrl, "_blank");
           }
           return;
         }
         throw error;
       }
     } catch (error: any) {
-      console.error('Error signing in with Google:', error);
-      alert('Failed to sign in with Google: ' + (error?.message || 'Unknown error'));
+      console.error("Error signing in with Google:", error);
+      alert(
+        "Failed to sign in with Google: " + (error?.message || "Unknown error")
+      );
     }
   };
 
@@ -189,8 +146,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error) {
-      console.error('Error signing out:', error);
-      alert('Failed to sign out. Please try again.');
+      console.error("Error signing out:", error);
+      alert("Failed to sign out. Please try again.");
     }
   };
 
@@ -216,7 +173,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error('useSettings must be used within SettingsProvider');
+    throw new Error("useSettings must be used within SettingsProvider");
   }
   return context;
 }

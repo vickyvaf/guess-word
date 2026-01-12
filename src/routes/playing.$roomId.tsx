@@ -1,3 +1,4 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
 import data from "@/data.json";
 import { Button } from "@/uikits/button";
@@ -7,13 +8,13 @@ import { useSettings } from "@/contexts/SettingsContext";
 const MAX_HEALTH = 5;
 const TOTAL = 5;
 
-export function PlayingField({
-  categorySelected,
-  setShowContent,
-}: {
-  categorySelected: string;
-  setShowContent: (s: string) => void;
-}) {
+export const Route = createFileRoute("/playing/$roomId")({
+  component: PlayingPage,
+});
+
+function PlayingPage() {
+  const { roomId } = Route.useParams();
+  const navigate = useNavigate();
   const { volume } = useSettings();
   const [completed, setCompleted] = useState(0);
   const [countdown, setCountdown] = useState(3);
@@ -23,17 +24,18 @@ export function PlayingField({
   const hasSavedScore = useRef(false);
 
   // @ts-ignore
-  const questions = data?.[categorySelected] || [];
+  const questions = data?.[roomId] || Object.values(data).flat();
+
   useEffect(() => {
     if (questions.length > 0) {
       setCurrentQuestionIndex(Math.floor(Math.random() * questions.length));
       setGuessed([]);
       setHealth(MAX_HEALTH);
       setCountdown(3);
-      setCompleted(0); // reset counter saat ganti kategori
-      hasSavedScore.current = false; // reset saved flag saat ganti kategori
+      setCompleted(0);
+      hasSavedScore.current = false;
     }
-  }, [categorySelected]);
+  }, [roomId, questions.length]);
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -57,7 +59,7 @@ export function PlayingField({
   const handleGuess = (letter: string) => {
     const L = letter.toUpperCase();
     if (guessed.includes(L) || health <= 0) return;
-    if (isWin) return; // stop input saat sudah menang
+    if (isWin) return;
 
     setGuessed((g) => [...g, L]);
 
@@ -66,12 +68,11 @@ export function PlayingField({
 
     try {
       const a = new Audio("/casual-click-pop-ui.mp3");
-      a.volume = (volume / 100) * 0.6; // Apply volume setting with 60% multiplier
+      a.volume = (volume / 100) * 0.6;
       a.play();
     } catch {}
   };
 
-  // keyboard fisik
   useEffect(() => {
     if (countdown > 0) return;
     const onKey = (e: KeyboardEvent) => {
@@ -80,33 +81,25 @@ export function PlayingField({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, guessed, health, answerChars]);
 
-  // 🏆 Menang saat completed == TOTAL
   const isWin = completed >= TOTAL;
 
-  // Jika solved → naikkan completed, lalu:
-  // - jika sudah mencapai TOTAL, TIDAK lanjut ke soal berikutnya
-  // - jika belum, acak soal berikutnya & reset guessed
   useEffect(() => {
     if (!isSolved || isWin) return;
 
-    // sfx opsional
     try {
       const s = new Audio("/success-quiz.mp3");
-      s.volume = (volume / 100) * 0.7; // Apply volume setting with 70% multiplier
+      s.volume = (volume / 100) * 0.7;
       s.play();
     } catch {}
 
     setCompleted((c) => {
       const nextC = Math.min(TOTAL, c + 1);
-      // Jika setelah increment sudah mencapai TOTAL, jangan ganti pertanyaan
       if (nextC >= TOTAL) {
         return nextC;
       }
 
-      // Kalau belum mencapai TOTAL → lanjut acak pertanyaan
       const len = Math.max(1, questions.length);
       let next = Math.floor(Math.random() * len);
       if (len > 1 && next === currentQuestionIndex) next = (next + 1) % len;
@@ -114,11 +107,10 @@ export function PlayingField({
       setGuessed([]);
       return nextC;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSolved, questions.length]);
 
   const isGameOver = health <= 0;
-  const backToMenu = () => setShowContent("choose-category");
+  const backToMenu = () => navigate({ to: "/" });
 
   if (!currentQuestion) {
     return (
@@ -175,10 +167,8 @@ export function PlayingField({
           position: "relative",
         }}
       >
-        {/* Health */}
         <HealthPoint health={health} />
 
-        {/* Clue + Answer */}
         <div>
           <div
             style={{
@@ -220,7 +210,6 @@ export function PlayingField({
           </div>
         </div>
 
-        {/* On-screen Keyboard */}
         <div
           aria-label="Keyboard"
           style={{ display: "grid", gap: "0.6rem", userSelect: "none" }}
@@ -263,7 +252,6 @@ export function PlayingField({
           ))}
         </div>
 
-        {/* ===== Game Over Modal ===== */}
         {isGameOver && (
           <div
             role="dialog"
@@ -349,7 +337,6 @@ export function PlayingField({
           </div>
         )}
 
-        {/* ===== Congratulations Modal ===== */}
         {isWin && (
           <div
             role="dialog"
@@ -395,16 +382,6 @@ export function PlayingField({
                 width={200}
                 height={200}
               />
-              <p
-                style={{
-                  margin: "0.75rem 0 0",
-                  fontSize: "1.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                You completed {TOTAL} questions in{" "}
-                <span style={{ fontWeight: 900 }}>{categorySelected}</span>!
-              </p>
 
               <div
                 style={{
@@ -432,14 +409,13 @@ export function PlayingField({
                 </Button>
                 <Button
                   onClick={() => {
-                    // main lagi: reset progress & acak soal
                     setCompleted(0);
                     setGuessed([]);
                     setHealth(MAX_HEALTH);
                     const len = Math.max(1, questions.length);
                     setCurrentQuestionIndex(Math.floor(Math.random() * len));
                     setCountdown(3);
-                    hasSavedScore.current = false; // reset saved flag saat play again
+                    hasSavedScore.current = false;
                   }}
                   style={{
                     border: "3px solid black",
@@ -459,7 +435,6 @@ export function PlayingField({
             </div>
           </div>
         )}
-        {/* ===== End Congratulations Modal ===== */}
       </div>
     </div>
   );
