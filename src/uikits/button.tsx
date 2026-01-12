@@ -1,14 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 
-type ButtonProps = {
-  children?: React.ReactNode;
-  onClick?: () => void;
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   fontSize?: string;
-  style?: React.CSSProperties;
-  disabled?: boolean;
-  icon?: React.ReactNode;
   rounded?: boolean;
+  icon?: React.ReactNode;
 };
 
 export function Button({
@@ -19,6 +15,7 @@ export function Button({
   disabled = false,
   rounded = false,
   icon,
+  ...props
 }: ButtonProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { volume } = useSettings();
@@ -43,9 +40,9 @@ export function Button({
   return (
     <button
       disabled={disabled}
-      onClick={() => {
+      onClick={(e) => {
         playSound();
-        onClick?.();
+        onClick?.(e);
       }}
       style={{
         borderRadius: rounded ? "100%" : "0.5em",
@@ -58,7 +55,9 @@ export function Button({
         cursor: disabled ? "not-allowed" : "pointer",
         border: `4px solid ${disabled ? "var(--button-disabled-border)" : "var(--button-border)"}`,
         padding: rounded ? "0.5rem" : "1rem 3rem",
-        backgroundColor: disabled ? "var(--button-disabled-bg)" : "var(--button-bg)",
+        backgroundColor: disabled
+          ? "var(--button-disabled-bg)"
+          : "var(--button-bg)",
         color: disabled ? "var(--button-disabled-text)" : "var(--button-text)",
         boxShadow: disabled ? "none" : "4px 4px 0 var(--button-shadow)",
         userSelect: "none",
@@ -69,6 +68,7 @@ export function Button({
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
       onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
       onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      {...props}
     >
       {icon ? icon : children}
     </button>

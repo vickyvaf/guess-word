@@ -1,8 +1,41 @@
 import { useState } from "react";
 import { Input } from "@/uikits/input";
 import { Button } from "@/uikits/button";
+import { Switch } from "@/uikits/switch";
 import { Modal } from "@/uikits/modal";
-import { useNavigate } from "@tanstack/react-router";
+import { Dices, User, Lock } from "lucide-react";
+
+const RANDOM_ADJECTIVES = [
+  "Happy",
+  "Lucky",
+  "Sunny",
+  "Bouncy",
+  "Speedy",
+  "Clever",
+  "Shiny",
+  "Brave",
+  "Calm",
+  "Wild",
+];
+const RANDOM_NOUNS = [
+  "Panda",
+  "Tiger",
+  "Eagle",
+  "Dolphin",
+  "Fox",
+  "Wizard",
+  "Ninja",
+  "Robot",
+  "Star",
+  "Comet",
+];
+
+const generateRandomName = () => {
+  const adj =
+    RANDOM_ADJECTIVES[Math.floor(Math.random() * RANDOM_ADJECTIVES.length)];
+  const noun = RANDOM_NOUNS[Math.floor(Math.random() * RANDOM_NOUNS.length)];
+  return `${adj} ${noun}`;
+};
 
 const MOCK_ROOMS = [
   {
@@ -32,9 +65,10 @@ const MOCK_ROOMS = [
 ];
 
 export function ChooseRoomScreen() {
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState(4);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [rooms, setRooms] = useState(MOCK_ROOMS);
 
   const handleCreateRoom = () => {
@@ -46,12 +80,15 @@ export function ChooseRoomScreen() {
       name: newRoomName,
       code: Math.floor(1000 + Math.random() * 9000).toString(),
       participants: 1,
-      maxParticipants: 4,
+      maxParticipants: maxParticipants,
       status: "Waiting",
+      isPrivate: isPrivate,
     };
 
     setRooms([...rooms, newRoom]);
     setNewRoomName("");
+    setMaxParticipants(4);
+    setIsPrivate(false);
     setIsModalOpen(false);
   };
 
@@ -119,25 +156,74 @@ export function ChooseRoomScreen() {
               <span style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
                 {room.name}
               </span>
-              <span
-                style={{ fontSize: "1rem", color: "#666", marginTop: "0.2rem" }}
+
+              <div
+                style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}
               >
-                Code:{" "}
-                <span style={{ fontFamily: "monospace", fontWeight: "bold" }}>
-                  {room.code}
-                </span>
-              </span>
-              <span style={{ fontSize: "1rem", color: "#666" }}>
-                {room.participants}/{room.maxParticipants} •{" "}
                 <span
                   style={{
-                    color: room.status === "Playing" ? "orange" : "green",
+                    fontSize: "0.9rem",
+                    color: "var(--button-text)",
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    padding: "0.1rem 0.5rem",
+                    borderRadius: "0.3rem",
+                    fontFamily: "monospace",
                     fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                  }}
+                >
+                  <Lock size={12} /> {room.code}
+                </span>
+                <span
+                  style={{
+                    color:
+                      room.status === "Playing" ? "#fff" : "var(--button-text)",
+                    backgroundColor:
+                      room.status === "Playing" ? "#ff9800" : "#4caf50",
+                    fontWeight: "bold",
+                    fontSize: "0.8rem",
+                    padding: "0.1rem 0.5rem",
+                    borderRadius: "1rem",
+                    display: "flex",
+                    alignItems: "center",
+                    textTransform: "uppercase",
                   }}
                 >
                   {room.status}
                 </span>
-              </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  marginTop: "0.5rem",
+                  color: "#666",
+                }}
+              >
+                <div style={{ display: "flex", gap: "2px" }}>
+                  {[...Array(room.maxParticipants)].map((_, i) => (
+                    <User
+                      key={i}
+                      size={20}
+                      fill={i < room.participants ? "currentColor" : "none"}
+                      style={{
+                        color:
+                          i < room.participants
+                            ? "var(--modal-text)"
+                            : "var(--input-border)",
+                        opacity: i < room.participants ? 1 : 0.5,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span style={{ fontSize: "0.9rem", marginLeft: "0.5rem" }}>
+                  {room.participants}/{room.maxParticipants}
+                </span>
+              </div>
             </div>
 
             <Button
@@ -174,20 +260,132 @@ export function ChooseRoomScreen() {
             >
               Room Name
             </label>
-            <Input
-              placeholder="e.g. Vicky's Room"
-              value={newRoomName}
-              onChange={(e) => setNewRoomName(e.target.value)}
-              autoFocus
-              style={{ width: "100%" }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateRoom();
+            <div
+              style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+            >
+              <Input
+                placeholder="Enter room name"
+                value={newRoomName}
+                onChange={(e) => setNewRoomName(e.target.value)}
+                autoFocus
+                style={{ width: "100%" }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateRoom();
+                }}
+              />
+              <Button
+                onClick={() => setNewRoomName(generateRandomName())}
+                style={{
+                  padding: "0.5rem 0.75rem",
+                  width: "fit-content",
+                  height: "fit-content",
+                  fontSize: "2rem",
+                }}
+                title="Generate Random Name"
+              >
+                <Dices size={24} />
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "0.5rem",
+                fontSize: "1.2rem",
               }}
+            >
+              Max Players
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  background: "var(--input-bg)",
+                  border: "4px solid var(--input-border)",
+                  borderRadius: "0.5rem",
+                  padding: "0.25rem",
+                  boxShadow: "4px 4px 0 var(--input-shadow)",
+                }}
+              >
+                <Button
+                  onClick={() =>
+                    setMaxParticipants(Math.max(2, maxParticipants - 1))
+                  }
+                  disabled={maxParticipants <= 2}
+                  style={{
+                    padding: "0.5rem",
+                    fontSize: "1rem",
+                    minWidth: "3rem",
+                  }}
+                >
+                  -
+                </Button>
+                <span
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: "bold",
+                    width: "2rem",
+                    textAlign: "center",
+                  }}
+                >
+                  {maxParticipants}
+                </span>
+                <Button
+                  onClick={() =>
+                    setMaxParticipants(Math.min(8, maxParticipants + 1))
+                  }
+                  disabled={maxParticipants >= 8}
+                  style={{
+                    padding: "0.5rem",
+                    fontSize: "1rem",
+                    minWidth: "3rem",
+                  }}
+                >
+                  +
+                </Button>
+              </div>
+
+              <div style={{ display: "flex", gap: "2px", opacity: 0.8 }}>
+                {[...Array(maxParticipants)].map((_, i) => (
+                  <User key={i} size={24} fill="currentColor" />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "0.5rem",
+                fontSize: "1.2rem",
+              }}
+            >
+              Privacy
+            </label>
+            <Switch
+              label={
+                isPrivate
+                  ? "Private Room (Requires Code)"
+                  : "Public Room (Open to All)"
+              }
+              checked={isPrivate}
+              onChange={setIsPrivate}
+              style={{ width: "100%" }}
             />
           </div>
 
           <div
-            style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "1rem",
+              marginTop: "1rem",
+            }}
           >
             <Button
               onClick={() => setIsModalOpen(false)}

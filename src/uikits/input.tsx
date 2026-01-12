@@ -29,6 +29,7 @@ export function Input({
         boxShadow: "4px 4px 0 var(--input-shadow)",
         userSelect: "none",
         outline: "none",
+        boxSizing: "border-box",
         transition: "all 0.1s ease",
         ...style,
       }}

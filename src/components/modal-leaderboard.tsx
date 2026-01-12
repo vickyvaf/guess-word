@@ -160,7 +160,8 @@ export function ModalLeaderboard() {
                               }}
                             />
                             <span style={{ fontWeight: 500, fontSize: "1rem" }}>
-                              {user.full_name}
+                              {user.full_name ||
+                                getFallbackFullNameById(user?.id)}
                             </span>
                           </div>
                         </div>
@@ -265,4 +266,8 @@ export function ModalLeaderboard() {
       ) : null}
     </>
   );
+}
+
+function getFallbackFullNameById(s: string) {
+  return `Player-${s.split("-")[0]}`;
 }
