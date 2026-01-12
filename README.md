@@ -1,76 +1,55 @@
-# Preview
+# Guess Word Game
+
+A modern, interactive word guessing game built with React and TypeScript. Challenge yourself with various categories, climb the leaderboards, and customize your gaming experience.
+
+## Preview
+
 <img width="1440" height="813" alt="Screenshot 2025-09-13 at 19 41 50" src="https://github.com/user-attachments/assets/4cd7f90f-c061-43bb-8140-a1ae12b823af" />
 <br />
 <br />
 <img width="1440" height="811" alt="Screenshot 2026-01-10 at 16 48 53" src="https://github.com/user-attachments/assets/4b4a39a2-a8bf-4ca5-b971-bfbdbccb8241" />
 
+## Features
 
-# React + TypeScript + Vite
+- **🎮 Engaging Gameplay**: Classic word guessing mechanics with a modern twist.
+- **📂 Category Selection**: Choose from multiple word categories to test your knowledge.
+- **🏆 Leaderboard System**: Compete with others and track your high scores.
+- **⚙️ Customizable Settings**: Adjust game preferences to suit your style.
+- **📱 Responsive Design**: optimized for both desktop and mobile play.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Tech Stack
 
-Currently, two official plugins are available:
+- **Frontend**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
+- **State Management**: [XState](https://stately.ai/)
+- **Routing & Data**: [TanStack Router](https://tanstack.com/router), [TanStack Query](https://tanstack.com/query)
+- **Backend / Auth**: [Supabase](https://supabase.com/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
 
-## Expanding the ESLint configuration
+1.  **Clone the repository**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+    ```bash
+    git clone <repository-url>
+    cd guess-word
+    ```
 
-```js
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+2.  **Install dependencies**
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+    ```bash
+    bun install
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+3.  **Run the development server**
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+    ```bash
+    bun run dev
+    ```
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+4.  **Build for production**
+    ```bash
+    bun run build
+    ```
 
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+## License
+
+[MIT](LICENSE)
