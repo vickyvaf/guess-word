@@ -26,10 +26,16 @@ export interface Room {
   participants: number;
   max_players: number;
   is_private: boolean;
+  current_round: number;
+  total_rounds: number;
+  current_drawer_id: string | null;
+  current_word: string | null;
+  round_expires_at: string | null;
 }
 
 export interface RoomParticipant {
   room_id: string;
   user_id: string;
   joined_at: string;
+  score: number;
 }

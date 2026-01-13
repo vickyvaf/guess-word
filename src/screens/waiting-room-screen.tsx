@@ -1,42 +1,108 @@
 import { useSettings } from "@/contexts/SettingsContext";
 import type { Room } from "@/supabase/model";
 import { services } from "@/supabase/service";
+import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
 import { useNavigate } from "@tanstack/react-router";
-import { Loader2, SearchX, User } from "lucide-react";
+import { Crown, Loader2, SearchX, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { User as UserType, RoomParticipant } from "@/supabase/model";
 
 export function WaitingRoomScreen() {
   const navigate = useNavigate();
   const { user } = useSettings();
   const roomCode = window.location.pathname.split("/").pop(); // Get code from URL
   const [room, setRoom] = useState<Room | null>(null);
+  const [participants, setParticipants] = useState<
+    (RoomParticipant & { user: UserType })[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!roomCode) return;
+    if (!roomCode || !user) return;
 
-    const fetchRoomData = async () => {
+    const initRoom = async () => {
       setIsLoading(true);
-      const { room } = await services.rooms.getByNameOrCode(roomCode);
-      setRoom(room);
+      // 1. Get Room
+      const { room: roomData, error } =
+        await services.rooms.getByNameOrCode(roomCode);
+
+      if (error || !roomData) {
+        setIsLoading(false);
+        return;
+      }
+      setRoom(roomData);
+
+      // 2. Join Room (if not already joined)
+      // We ignore error here because unique constraint (already joined) is expected
+      await services.rooms.joinRoom(roomData.id, user.id);
+
+      // 3. Get Participants
+      const fetchParticipants = async () => {
+        const { participants: parts } = await services.rooms.getParticipants(
+          roomData.id
+        );
+        if (parts) {
+          // Filter out any where user join failed or something
+          setParticipants(
+            parts.filter((p) => p.user) as (RoomParticipant & {
+              user: UserType;
+            })[]
+          );
+        }
+      };
+
+      await fetchParticipants();
       setIsLoading(false);
+
+      // 4. Subscribe to new participants
+      const channel = supabase
+        .channel(`room_${roomData.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "room_participants",
+            filter: `room_id=eq.${roomData.id}`,
+          },
+          (payload) => {
+            console.log("Realtime update received:", payload);
+            fetchParticipants();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "rooms",
+            filter: `id=eq.${roomData.id}`,
+          },
+          (payload) => {
+            const newRoom = payload.new as Room;
+            if (newRoom.status === "Playing") {
+              navigate({ to: `/playing/${newRoom.room_code}` });
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
 
-    fetchRoomData();
-  }, [roomCode]);
+    initRoom();
+  }, [roomCode, user]);
 
   const handleStartGame = async () => {
     if (!room) return;
 
-    // Update status to Playing
-    await services.rooms.updateRoom(room.id, { status: "Playing" });
-
-    // Navigate using the ROOM CODE as per request/current pattern
+    // Update status to Playing. Navigation happens via realtime subscription or fallback
+    await services.rooms.startGame(room.id);
     navigate({ to: `/playing/${room.room_code}` });
   };
-
-  let displayedUsers: any[] = [];
 
   if (isLoading) {
     return (
@@ -124,16 +190,18 @@ export function WaitingRoomScreen() {
             marginBottom: "1rem",
           }}
         >
-          <span
-            style={{
-              fontFamily: "monospace",
-              background: "rgba(0,0,0,0.1)",
-              padding: "0.2rem 0.5rem",
-              borderRadius: "0.25rem",
-            }}
-          >
-            Code: {room.room_code}
-          </span>
+          {room.is_private && (
+            <span
+              style={{
+                fontFamily: "monospace",
+                background: "rgba(0,0,0,0.1)",
+                padding: "0.2rem 0.5rem",
+                borderRadius: "0.25rem",
+              }}
+            >
+              Code: {room.room_code}
+            </span>
+          )}
         </div>
         <TextWaiting />
       </div>
@@ -150,9 +218,9 @@ export function WaitingRoomScreen() {
           alignContent: "start",
         }}
       >
-        {displayedUsers.map((u) => (
+        {participants.map((p) => (
           <div
-            key={u.id}
+            key={p.user_id}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -172,21 +240,51 @@ export function WaitingRoomScreen() {
               style={{
                 width: "64px",
                 height: "64px",
-                borderRadius: "50%",
-                background: "var(--button-disabled-bg)", // Use variable
-                display: "grid",
-                placeItems: "center",
-                overflow: "hidden",
+                position: "relative",
               }}
             >
-              {u.avatar_url ? (
-                <img
-                  src={u.avatar_url!}
-                  alt={u.name}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <User size={32} />
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "var(--button-disabled-bg)", // Use variable
+                  display: "grid",
+                  placeItems: "center",
+                  overflow: "hidden",
+                }}
+              >
+                {p.user.avatar_url ? (
+                  <img
+                    src={p.user.avatar_url!}
+                    alt={p.user.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <User size={32} />
+                )}
+              </div>
+              {room.host_id === p.user_id && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: -2,
+                    right: -2,
+                    background: "#FFD700",
+                    borderRadius: "50%",
+                    padding: "4px",
+                    border: "2px solid var(--button-border)",
+                    display: "grid",
+                    placeItems: "center",
+                    zIndex: 10,
+                  }}
+                >
+                  <Crown size={14} color="#000" fill="#000" />
+                </div>
               )}
             </div>
             <span
@@ -197,31 +295,14 @@ export function WaitingRoomScreen() {
                 textWrap: "balance",
               }}
             >
-              {u.name}
+              {p.user.name || "Unknown"}
             </span>
-            {u.isHost && (
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  background: "#FFD700",
-                  color: "#000", // Ensure valid contrast on gold
-                  padding: "0.2rem 0.6rem",
-                  borderRadius: "1rem",
-                  border: "2px solid var(--button-border)",
-                  fontWeight: "bold",
-                }}
-              >
-                HOST
-              </span>
-            )}
           </div>
         ))}
 
         {/* Empty slots placeholders */}
         {[
-          ...Array(
-            Math.max(0, (room.max_players || 4) - displayedUsers.length)
-          ),
+          ...Array(Math.max(0, (room.max_players || 4) - participants.length)),
         ].map((_, i) => (
           <div
             key={`empty-${i}`}

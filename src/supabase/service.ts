@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { User, Room } from "./model";
+import type { User, Room, RoomParticipant } from "./model";
 
 export const services = {
   users: {
@@ -102,6 +102,42 @@ export const services = {
         .from("rooms")
         .update(updates)
         .eq("id", id)
+        .select()
+        .single();
+
+      return { room: data as Room, error };
+    },
+    joinRoom: async (roomId: string, userId: string) => {
+      const { error } = await supabase
+        .from("room_participants")
+        .insert({ room_id: roomId, user_id: userId });
+
+      return { error };
+    },
+    getParticipants: async (roomId: string) => {
+      const { data, error } = await supabase
+        .from("room_participants")
+        .select(
+          `
+          *,
+          user:users(*)
+        `
+        )
+        .eq("room_id", roomId);
+
+      return {
+        participants: data as (RoomParticipant & { user: User })[],
+        error,
+      };
+    },
+    startGame: async (roomId: string) => {
+      const { data, error } = await supabase
+        .from("rooms")
+        .update({
+          status: "Playing",
+          current_round: 1,
+        })
+        .eq("id", roomId)
         .select()
         .single();
 

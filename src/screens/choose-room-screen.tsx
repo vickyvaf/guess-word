@@ -110,6 +110,11 @@ export function ChooseRoomScreen() {
   const handleCreateRoom = async () => {
     if (!newRoomName.trim()) return;
 
+    if (!user) {
+      alert("Please sign in to create a room");
+      return;
+    }
+
     setIsCreating(true);
 
     const { room, error } = await services.rooms.createRoom({
@@ -119,8 +124,8 @@ export function ChooseRoomScreen() {
       max_players: maxParticipants,
       status: "Waiting",
       is_private: isPrivate,
-      created_by: user?.id || "anon",
-      host_id: user?.id || "anon",
+      created_by: user.id,
+      host_id: user.id,
     });
 
     if (error || !room) {
@@ -637,7 +642,7 @@ export function ChooseRoomScreen() {
             <Button
               onClick={handleCreateRoom}
               fontSize="1.2rem"
-              disabled={!newRoomName.trim() || isCreating}
+              disabled={!newRoomName.trim() || isCreating || !user}
               style={{ width: "100%" }}
             >
               {isCreating ? "Creating..." : "Create"}

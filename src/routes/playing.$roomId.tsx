@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
-import data from "@/data.json";
 import { Button } from "@/uikits/button";
 import { HealthPoint } from "@/components/health-point";
 import { useSettings } from "@/contexts/SettingsContext";
+import { services } from "@/supabase/service";
+import type { Room, RoomParticipant } from "@/supabase/model";
+import { supabase } from "@/supabase/supabase";
+import { Loader2 } from "lucide-react";
+import data from "@/data.json";
 
 const MAX_HEALTH = 5;
-const TOTAL = 5;
 
 export const Route = createFileRoute("/playing/$roomId")({
   component: PlayingPage,
@@ -15,31 +18,107 @@ export const Route = createFileRoute("/playing/$roomId")({
 function PlayingPage() {
   const { roomId } = Route.useParams();
   const navigate = useNavigate();
-  const { volume } = useSettings();
-  const [completed, setCompleted] = useState(0);
-  const [countdown, setCountdown] = useState(3);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const { user, volume } = useSettings();
+
+  const [room, setRoom] = useState<Room | null>(null);
+  const [participants, setParticipants] = useState<RoomParticipant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Game State
   const [guessed, setGuessed] = useState<string[]>([]);
   const [health, setHealth] = useState(MAX_HEALTH);
-  const hasSavedScore = useRef(false);
+  const [countdown, setCountdown] = useState(3);
+  const [isGameOver, setIsGameOver] = useState(false); // Local state for game over animation
 
-  // @ts-ignore
-  const questions = data?.[roomId] || Object.values(data).flat();
-
+  // Fetch Room & Participants
   useEffect(() => {
-    if (questions.length > 0) {
-      setCurrentQuestionIndex(Math.floor(Math.random() * questions.length));
-      setGuessed([]);
-      setHealth(MAX_HEALTH);
+    if (!roomId) return;
+
+    const init = async () => {
+      // 1. Get Room
+      const { room: roomData } = await services.rooms.getByNameOrCode(roomId);
+      if (!roomData) {
+        navigate({ to: "/" });
+        return;
+      }
+      setRoom(roomData);
       setCountdown(3);
-      setCompleted(0);
-      hasSavedScore.current = false;
+
+      // 2. Get initial participants
+      const { participants: parts } = await services.rooms.getParticipants(
+        roomData.id
+      );
+      if (parts) setParticipants(parts);
+
+      setIsLoading(false);
+
+      // 3. Subscribe to Room Updates (Game State)
+      const channel = supabase
+        .channel(`playing_${roomData.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "rooms",
+            filter: `id=eq.${roomData.id}`,
+          },
+          (payload) => {
+            const newRoom = payload.new as Room;
+            setRoom(newRoom);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    init();
+  }, [roomId, navigate]);
+
+  // Game Logic Effect (Host only initially, or finding word)
+  useEffect(() => {
+    if (!room || !user) return;
+
+    // If host and no word is set, set one?
+    // For now, let's assume we just want to play a local game SYNCED via DB?
+    // Or actually, simpler: Host sets the word.
+
+    if (room.host_id === user.id && !room.current_word) {
+      // Pick random word
+      const questions = Object.values(data).flat();
+      const randomQ = questions[Math.floor(Math.random() * questions.length)];
+
+      services.rooms.updateRoom(room.id, {
+        current_word: randomQ.answer,
+        // We could also store clue in DB if we added a column,
+        // but for now let's just stick to "answer" and look up clue locally or if clue is not needed?
+        // WAIT. We need the CLUE.
+        // Let's assume we just store the generic "current_word" which includes data.
+        // Actually, better to just store index or just the word string.
+        // To keep it simple: We need to match the word to get the clue.
+      });
     }
-  }, [roomId, questions.length]);
+  }, [room, user]);
 
-  const currentQuestion = questions[currentQuestionIndex];
+  // Derived State
+  const currentQuestion = useMemo(() => {
+    if (!room?.current_word) return null;
+    // Find question data based on answer match
+    const questions = Object.values(data).flat();
+    return questions.find((q) => q.answer === room.current_word);
+  }, [room?.current_word]);
 
-  const answerChars: string[] = useMemo(
+  // Countdown
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const interval = setInterval(() => setCountdown((c) => c - 1), 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
+
+  const answerChars = useMemo(
     () => (currentQuestion?.answer ?? "").toUpperCase().split(""),
     [currentQuestion]
   );
@@ -50,22 +129,22 @@ function PlayingPage() {
     return alphaChars.every((ch) => guessed.includes(ch));
   }, [answerChars, guessed]);
 
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const interval = setInterval(() => setCountdown((c) => c - 1), 1000);
-    return () => clearInterval(interval);
-  }, [countdown]);
-
+  // Handle Guess
   const handleGuess = (letter: string) => {
     const L = letter.toUpperCase();
     if (guessed.includes(L) || health <= 0) return;
-    if (isWin) return;
+    if (isSolved) return;
 
     setGuessed((g) => [...g, L]);
 
     const isCorrect = answerChars.includes(L);
-    if (!isCorrect) setHealth((h) => Math.max(0, h - 1));
+    if (!isCorrect) {
+      setHealth((h) => Math.max(0, h - 1));
+    } else {
+      // Play success sound if needed
+    }
 
+    // Sound FX
     try {
       const a = new Audio("/casual-click-pop-ui.mp3");
       a.volume = (volume / 100) * 0.6;
@@ -73,6 +152,7 @@ function PlayingPage() {
     } catch {}
   };
 
+  // Keyboard Listener
   useEffect(() => {
     if (countdown > 0) return;
     const onKey = (e: KeyboardEvent) => {
@@ -83,48 +163,19 @@ function PlayingPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [countdown, guessed, health, answerChars]);
 
-  const isWin = completed >= TOTAL;
+  if (isLoading || !room) {
+    return (
+      <div className="grid place-items-center h-screen">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (!isSolved || isWin) return;
-
-    try {
-      const s = new Audio("/success-quiz.mp3");
-      s.volume = (volume / 100) * 0.7;
-      s.play();
-    } catch {}
-
-    setCompleted((c) => {
-      const nextC = Math.min(TOTAL, c + 1);
-      if (nextC >= TOTAL) {
-        return nextC;
-      }
-
-      const len = Math.max(1, questions.length);
-      let next = Math.floor(Math.random() * len);
-      if (len > 1 && next === currentQuestionIndex) next = (next + 1) % len;
-      setCurrentQuestionIndex(next);
-      setGuessed([]);
-      return nextC;
-    });
-  }, [isSolved, questions.length]);
-
-  const isGameOver = health <= 0;
-  const backToMenu = () => navigate({ to: "/" });
-
+  // Waiting for Host to pick word (if null)
   if (!currentQuestion) {
     return (
-      <div
-        style={{
-          display: "grid",
-          placeItems: "center",
-          width: "100vw",
-          height: "100vh",
-          fontSize: "2rem",
-          fontWeight: "bold",
-        }}
-      >
-        No question found.
+      <div className="grid place-items-center h-screen text-2xl font-bold">
+        Waiting for host to pick a word...
       </div>
     );
   }
@@ -144,9 +195,7 @@ function PlayingPage() {
           textAlign: "center",
         }}
       >
-        <h1 style={{ margin: 0, fontSize: "3rem" }}>
-          Get ready, the game begins in
-        </h1>
+        <h1 style={{ margin: 0, fontSize: "3rem" }}>Get ready...</h1>
         <h1 style={{ margin: 0, fontSize: "8rem" }}>{countdown}</h1>
       </div>
     );
@@ -227,7 +276,7 @@ function PlayingPage() {
             >
               {row.split("").map((key) => {
                 const used = guessed.includes(key);
-                const disabled = used || isGameOver || isWin;
+                const disabled = used || health <= 0 || isSolved;
                 return (
                   <Button
                     key={key}
@@ -260,189 +309,27 @@ function PlayingPage() {
           ))}
         </div>
 
-        {isGameOver && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Game Over"
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "var(--modal-overlay)",
-              display: "grid",
-              placeItems: "center",
-              zIndex: 50,
-            }}
-          >
-            <div
-              style={{
-                width: "min(90vw, 560px)",
-                background: "var(--modal-bg)",
-                border: "3px solid var(--modal-border)",
-                borderRadius: "1rem",
-                boxShadow: "8px 8px 0 var(--modal-shadow)",
-                padding: "1.25rem 1.25rem 1rem",
-                color: "var(--modal-text)",
-                textAlign: "center",
-              }}
-            >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: "2.5rem",
-                  lineHeight: 1.2,
-                  fontWeight: 900,
-                }}
-              >
-                Game Over
-              </h2>
-              <img src="/dead.png" width={200} height={200} />
-              <p
-                style={{
-                  margin: "0.75rem 0 0",
-                  fontSize: "1.1rem",
-                  fontWeight: 600,
-                }}
-              >
-                The correct answer was:
+        {health <= 0 && (
+          <div className="fixed inset-0 bg-black/50 grid place-items-center z-50">
+            <div className="bg-white p-8 rounded-xl text-center border-4 border-black">
+              <h2 className="text-4xl font-black mb-4">Game Over</h2>
+              <p className="text-xl">
+                The word was:{" "}
+                <span className="font-bold">{currentQuestion.answer}</span>
               </p>
-              <div
-                style={{
-                  marginTop: "0.25rem",
-                  fontSize: "2rem",
-                  fontWeight: 900,
-                  letterSpacing: "1px",
-                }}
-              >
-                {currentQuestion.answer?.toUpperCase?.() ?? ""}
-              </div>
-              <div
-                style={{
-                  marginTop: "1rem",
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <Button
-                  onClick={backToMenu}
-                  style={{
-                    border: "3px solid var(--button-border)",
-                    borderRadius: "0.75rem",
-                    backgroundColor: "var(--button-bg)",
-                    color: "var(--button-text)",
-                    boxShadow: "4px 4px 0 var(--button-shadow)",
-                    fontSize: "1.25rem",
-                    padding: "0.75rem 1.25rem",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "transform 0.08s ease",
-                  }}
-                >
-                  Try Again
-                </Button>
-              </div>
+              <Button onClick={() => navigate({ to: "/" })} className="mt-4">
+                Back to Menu
+              </Button>
             </div>
           </div>
         )}
 
-        {isWin && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Congratulations"
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "var(--modal-overlay)",
-              display: "grid",
-              placeItems: "center",
-              zIndex: 60,
-            }}
-          >
-            <div
-              style={{
-                width: "min(90vw, 600px)",
-                background: "var(--modal-bg)",
-                border: "3px solid var(--modal-border)",
-                borderRadius: "1rem",
-                boxShadow: "8px 8px 0 var(--modal-shadow)",
-                padding: "1.25rem 1.25rem 1.25rem",
-                color: "var(--modal-text)",
-                textAlign: "center",
-              }}
-            >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: "2.5rem",
-                  lineHeight: 1.2,
-                  fontWeight: 900,
-                  marginBottom: 40,
-                }}
-              >
-                Congratulations!
-              </h2>
-              <img
-                src="/trophy.png"
-                style={{
-                  margin: "1rem",
-                }}
-                width={200}
-                height={200}
-              />
-
-              <div
-                style={{
-                  marginTop: "1rem",
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <Button
-                  onClick={backToMenu}
-                  style={{
-                    border: "3px solid var(--button-border)",
-                    borderRadius: "0.75rem",
-                    backgroundColor: "var(--button-bg)",
-                    color: "var(--button-text)",
-                    boxShadow: "4px 4px 0 var(--button-shadow)",
-                    fontSize: "1.1rem",
-                    padding: "0.75rem 1.25rem",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "transform 0.08s ease",
-                  }}
-                >
-                  Back to Menu
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCompleted(0);
-                    setGuessed([]);
-                    setHealth(MAX_HEALTH);
-                    const len = Math.max(1, questions.length);
-                    setCurrentQuestionIndex(Math.floor(Math.random() * len));
-                    setCountdown(3);
-                    hasSavedScore.current = false;
-                  }}
-                  style={{
-                    border: "3px solid var(--button-border)",
-                    borderRadius: "0.75rem",
-                    backgroundColor: "var(--button-bg)",
-                    color: "var(--button-text)",
-                    boxShadow: "4px 4px 0 var(--button-shadow)",
-                    fontSize: "1.1rem",
-                    padding: "0.75rem 1.25rem",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    transition: "transform 0.08s ease",
-                  }}
-                >
-                  Play Again
-                </Button>
-              </div>
+        {isSolved && (
+          <div className="fixed inset-0 bg-black/50 grid place-items-center z-50">
+            <div className="bg-white p-8 rounded-xl text-center border-4 border-black">
+              <h2 className="text-4xl font-black mb-4">Correct!</h2>
+              <p className="text-xl">Waiting for next round...</p>
+              {/** Logic for next round would go here, driven by Host updating DB **/}
             </div>
           </div>
         )}
