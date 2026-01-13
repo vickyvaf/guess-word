@@ -143,5 +143,14 @@ export const services = {
 
       return { room: data as Room, error };
     },
+    updateScore: async (roomId: string, userId: string, score: number) => {
+      const { error } = await supabase
+        .from("room_participants")
+        .update({ score })
+        .eq("room_id", roomId)
+        .eq("user_id", userId);
+
+      return { error };
+    },
   },
 };

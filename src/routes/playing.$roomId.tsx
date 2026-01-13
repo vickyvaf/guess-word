@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/uikits/button";
 import { HealthPoint } from "@/components/health-point";
 import { useSettings } from "@/contexts/SettingsContext";
 import { services } from "@/supabase/service";
-import type { Room, RoomParticipant } from "@/supabase/model";
+import type { Room, RoomParticipant, User } from "@/supabase/model";
 import { supabase } from "@/supabase/supabase";
-import { Loader2 } from "lucide-react";
+import { Loader2, Crown } from "lucide-react";
 import data from "@/data.json";
 
 const MAX_HEALTH = 5;
@@ -21,14 +21,15 @@ function PlayingPage() {
   const { user, volume } = useSettings();
 
   const [room, setRoom] = useState<Room | null>(null);
-  const [participants, setParticipants] = useState<RoomParticipant[]>([]);
+  const [participants, setParticipants] = useState<
+    (RoomParticipant & { user: User })[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Game State
   const [guessed, setGuessed] = useState<string[]>([]);
   const [health, setHealth] = useState(MAX_HEALTH);
   const [countdown, setCountdown] = useState(3);
-  const [isGameOver, setIsGameOver] = useState(false); // Local state for game over animation
 
   // Fetch Room & Participants
   useEffect(() => {
@@ -52,7 +53,7 @@ function PlayingPage() {
 
       setIsLoading(false);
 
-      // 3. Subscribe to Room Updates (Game State)
+      // 3. Subscribe to Updates
       const channel = supabase
         .channel(`playing_${roomData.id}`)
         .on(
@@ -66,6 +67,23 @@ function PlayingPage() {
           (payload) => {
             const newRoom = payload.new as Room;
             setRoom(newRoom);
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "room_participants",
+            filter: `room_id=eq.${roomData.id}`,
+          },
+          () => {
+            // Refresh participants on any change (score update, join/leave)
+            services.rooms
+              .getParticipants(roomData.id)
+              .then(({ participants: parts }) => {
+                if (parts) setParticipants(parts);
+              });
           }
         )
         .subscribe();
@@ -128,6 +146,16 @@ function PlayingPage() {
     if (alphaChars.length === 0) return false;
     return alphaChars.every((ch) => guessed.includes(ch));
   }, [answerChars, guessed]);
+
+  // Update Score when Solved
+  useEffect(() => {
+    if (isSolved && user && room) {
+      // Increment score
+      const currentScore =
+        participants.find((p) => p.user_id === user.id)?.score || 0;
+      services.rooms.updateScore(room.id, user.id, currentScore + 10);
+    }
+  }, [isSolved]);
 
   // Handle Guess
   const handleGuess = (letter: string) => {
@@ -333,6 +361,87 @@ function PlayingPage() {
             </div>
           </div>
         )}
+
+        {/* Player List (Bottom Left) */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: "1rem",
+            left: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+            zIndex: 40,
+            pointerEvents: "none", // allow clicking through if needed, though buttons are usually higher
+          }}
+        >
+          {participants
+            .sort((a, b) => b.score - a.score)
+            .map((p) => (
+              <div
+                key={p.user_id}
+                style={{
+                  background: "var(--input-bg)",
+                  color: "var(--input-text)",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  border: "2px solid var(--button-border)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  boxShadow: "2px 2px 0 var(--button-shadow)",
+                  minWidth: "160px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: "var(--button-disabled-bg)",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  {p.user.avatar_url && (
+                    <img
+                      src={p.user.avatar_url}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  )}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    lineHeight: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    {p.user.name}
+                    {room?.host_id === p.user_id && (
+                      <Crown size={12} fill="#FFD700" color="#000" />
+                    )}
+                  </span>
+                  <span style={{ fontSize: "0.8rem", opacity: 0.8 }}>
+                    {p.score} pts
+                  </span>
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );
