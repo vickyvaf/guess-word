@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
         "/api/supabase": {
           target: env.SUPABASE_TARGET_URL || env.VITE_SUPABASE_URL,
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api\/supabase/, ""),
         },
       },
