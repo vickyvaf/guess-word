@@ -2,6 +2,7 @@ import {
   ModalCreateRoom,
   ModalEnterPasscode,
 } from "@/components/modal-create-room";
+import { useDebounce } from "@/hooks/use-debounce";
 import type { Room } from "@/supabase/model";
 import { services } from "@/supabase/service";
 import { supabase } from "@/supabase/supabase";
@@ -13,11 +14,12 @@ import { useEffect, useState } from "react";
 
 export function ChooseRoomScreen() {
   const [searchRoomName, setSearchRoomName] = useState("");
+  const [debouncedSearchRoomName] = useDebounce(searchRoomName, 500);
 
   const queryClient = useQueryClient();
 
   const { data: rooms, isLoading } = useQuery({
-    queryKey: ["rooms", { search: searchRoomName }],
+    queryKey: ["rooms", { search: debouncedSearchRoomName }],
     queryFn: async () => {
       const { rooms } = await services.rooms.getAllRooms();
       return rooms || [];
@@ -35,8 +37,6 @@ export function ChooseRoomScreen() {
           table: "rooms",
         },
         (payload) => {
-          console.log("payload", payload);
-
           if (payload.eventType === "UPDATE") {
             queryClient.setQueryData<Room[]>(
               ["rooms", { search: searchRoomName }],

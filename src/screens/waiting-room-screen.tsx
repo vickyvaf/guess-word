@@ -4,7 +4,7 @@ import { services } from "@/supabase/service";
 import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
 import { useNavigate } from "@tanstack/react-router";
-import { Crown, Loader2, SearchX, User } from "lucide-react";
+import { Crown, SearchX, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { User as UserType, RoomParticipant } from "@/supabase/model";
 
@@ -67,7 +67,6 @@ export function WaitingRoomScreen() {
             filter: `room_id=eq.${roomData.id}`,
           },
           (payload) => {
-            console.log("Realtime update received:", payload);
             fetchParticipants();
           }
         )
@@ -108,13 +107,74 @@ export function WaitingRoomScreen() {
     return (
       <div
         style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          marginTop: "2rem",
           display: "flex",
-          height: "100vh",
-          justifyContent: "center",
+          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "start",
+          height: "100vh",
+          padding: "0",
+          position: "relative",
         }}
       >
-        <Loader2 className="animate-spin" size={48} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+            paddingTop: "6rem",
+            paddingBottom: "1rem",
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+            gap: "1rem",
+          }}
+        >
+          {/* Room Name */}
+          <Skeleton width="60%" height="3rem" />
+
+          {/* Room Code Badge */}
+          <Skeleton width="120px" height="2rem" />
+
+          {/* Waiting Text */}
+          <Skeleton width="240px" height="1.5rem" />
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+            gap: "1rem",
+            padding: "1rem",
+            flex: 1,
+            overflowY: "auto",
+            alignContent: "start",
+          }}
+        >
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "1rem",
+                background: "var(--input-bg)",
+                border: "3px solid transparent",
+                borderRadius: "1rem",
+                aspectRatio: "1/1",
+                justifyContent: "center",
+              }}
+            >
+              <Skeleton width="64px" height="64px" borderRadius="50%" />
+              <Skeleton width="80%" height="1.2rem" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -361,6 +421,7 @@ export function WaitingRoomScreen() {
           <Button
             onClick={handleStartGame}
             fontSize="1.5rem"
+            disabled={participants.length < 2}
             style={{ padding: "1rem 3rem", width: "100%", maxWidth: "400px" }}
           >
             Start Game
@@ -385,5 +446,34 @@ function TextWaiting() {
     <p style={{ fontSize: "1.2rem", color: "#666", minWidth: "240px" }}>
       Waiting for players to join{dots}
     </p>
+  );
+}
+
+interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+  width?: string | number;
+  height?: string | number;
+  borderRadius?: string;
+  className?: string;
+}
+
+function Skeleton({
+  width,
+  height,
+  borderRadius = "0.5rem",
+  style,
+  className = "",
+  ...props
+}: SkeletonProps) {
+  return (
+    <div
+      className={`shimmer ${className}`}
+      style={{
+        width: width,
+        height: height,
+        borderRadius: borderRadius,
+        ...style,
+      }}
+      {...props}
+    />
   );
 }

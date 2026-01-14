@@ -62,7 +62,7 @@ export function Button({
         boxShadow: disabled ? "none" : "4px 4px 0 var(--button-shadow)",
         userSelect: "none",
         transition: "transform 0.1s ease",
-        opacity: disabled ? 0.6 : 1,
+        opacity: disabled ? 0.6 : undefined,
         ...style,
       }}
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}

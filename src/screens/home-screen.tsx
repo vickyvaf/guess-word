@@ -1,14 +1,12 @@
 import { Button } from "@/uikits/button";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 
 export function HomeScreen() {
   const navigate = useNavigate();
-  const [shouldAnimate] = useState(() => performance.now() < 2000);
 
   return (
     <div
-      className={shouldAnimate ? "fade-in-delayed" : ""}
+      className={"fade-in-delayed"}
       style={{
         width: "100%",
         position: "absolute",
