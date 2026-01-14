@@ -35,6 +35,8 @@ export function ChooseRoomScreen() {
           table: "rooms",
         },
         (payload) => {
+          console.log("payload", payload);
+
           if (payload.eventType === "UPDATE") {
             queryClient.setQueryData<Room[]>(
               ["rooms", { search: searchRoomName }],
@@ -45,7 +47,7 @@ export function ChooseRoomScreen() {
             queryClient.setQueryData<Room[]>(
               ["rooms", { search: searchRoomName }],
               // @ts-ignore
-              (oldData) => oldData?.filter((room) => room.id !== payload.new.id)
+              (oldData) => oldData?.filter((room) => room.id !== payload.old.id)
             );
           }
         }
