@@ -5,7 +5,7 @@ import { Button } from "@/uikits/button";
 import { Input } from "@/uikits/input";
 import { Modal } from "@/uikits/modal";
 import { Switch } from "@/uikits/switch";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Dices, User } from "lucide-react";
 import { useState } from "react";
@@ -45,13 +45,24 @@ function generateRandomName() {
 
 export function ModalCreateRoom() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+
   const { user } = useSettings();
 
   const [isOpen, setIsOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(4);
   const [isPrivate, setIsPrivate] = useState(false);
+
+  function handleOpenModal() {
+    setIsOpen(true);
+  }
+
+  function handleCloseModal() {
+    setNewRoomName("");
+    setMaxParticipants(4);
+    setIsPrivate(false);
+    setIsOpen(false);
+  }
 
   const { mutate: createRoom, isPending: isCreating } = useMutation({
     mutationFn: async () => {
@@ -75,7 +86,6 @@ export function ModalCreateRoom() {
         throw new Error(error?.message || "Failed to create room");
       }
 
-      // Auto-join the creator
       if (user?.id) {
         await services.rooms.updateRoom(room.id, { participants: 1 });
       }
@@ -83,34 +93,13 @@ export function ModalCreateRoom() {
       return room;
     },
     onSuccess: (room) => {
-      queryClient.setQueryData(["rooms"], (oldRooms: Room[] | undefined) => [
-        room,
-        ...(oldRooms || []),
-      ]);
-      setNewRoomName("");
-      setMaxParticipants(4);
-      setIsPrivate(false);
-      setIsOpen(false);
-
-      // Navigate to waiting room
-      //   navigate({ to: `/waiting/${room.room_code}` });
+      handleCloseModal();
+      navigate({ to: `/waiting/${room.room_code}` });
     },
     onError: (error) => {
-      console.error("Failed to create room", error);
       alert(error.message);
     },
   });
-
-  function handleClose() {
-    setIsOpen(false);
-    setNewRoomName("");
-    setMaxParticipants(4);
-    setIsPrivate(false);
-  }
-
-  function handleOpen() {
-    setIsOpen(true);
-  }
 
   return (
     <>
@@ -118,12 +107,12 @@ export function ModalCreateRoom() {
         fontSize="1.5rem"
         className="responsive-btn"
         style={{ whiteSpace: "nowrap" }}
-        onClick={handleOpen}
+        onClick={handleOpenModal}
       >
         + Add
       </Button>
 
-      <Modal open={isOpen} onClose={handleClose} title="Create New Room">
+      <Modal open={isOpen} onClose={handleCloseModal} title="Create New Room">
         <div
           style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -272,7 +261,7 @@ export function ModalCreateRoom() {
             }}
           >
             <Button
-              onClick={handleClose}
+              onClick={handleCloseModal}
               fontSize="1.2rem"
               style={{ background: "#eee", width: "100%", color: "#000" }}
             >

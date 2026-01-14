@@ -7,12 +7,14 @@ import { services } from "@/supabase/service";
 import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
 import { Input } from "@/uikits/input";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ghost, Globe, Lock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function ChooseRoomScreen() {
   const [searchRoomName, setSearchRoomName] = useState("");
+
+  const queryClient = useQueryClient();
 
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms", { search: searchRoomName }],
@@ -28,17 +30,18 @@ export function ChooseRoomScreen() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "UPDATE",
           schema: "public",
           table: "rooms",
         },
         (payload) => {
-          console.log("ROOM EVENT:", payload);
+          queryClient.setQueryData<Room[]>(
+            ["rooms", { search: searchRoomName }],
+            (oldData) => [payload.new as Room, ...(oldData || [])]
+          );
         }
       )
-      .subscribe((status) => {
-        console.log("REALTIME STATUS:", status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
