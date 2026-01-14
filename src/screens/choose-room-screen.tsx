@@ -9,6 +9,7 @@ import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
 import { Input } from "@/uikits/input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Ghost, Globe, Lock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -39,13 +40,13 @@ export function ChooseRoomScreen() {
         (payload) => {
           if (payload.eventType === "UPDATE") {
             queryClient.setQueryData<Room[]>(
-              ["rooms", { search: searchRoomName }],
+              ["rooms", { search: debouncedSearchRoomName }],
               (oldData) => [payload.new as Room, ...(oldData || [])]
             );
           }
           if (payload.eventType === "DELETE") {
             queryClient.setQueryData<Room[]>(
-              ["rooms", { search: searchRoomName }],
+              ["rooms", { search: debouncedSearchRoomName }],
               // @ts-ignore
               (oldData) => oldData?.filter((room) => room.id !== payload.old.id)
             );
@@ -234,9 +235,25 @@ function SkeletonListRoom() {
 }
 
 function CardRoom({ room }: { room: Room }) {
+  const navigate = useNavigate();
+
+  const [openModalEnterPasscode, setOpenModalEnterPasscode] = useState(false);
+
+  function handleJoinRoom() {
+    if (room.is_private) {
+      setOpenModalEnterPasscode(true);
+    } else {
+      navigate({ to: `/waiting/${room.room_code}` });
+    }
+  }
+
   return (
     <>
-      <ModalEnterPasscode room={room} />
+      <ModalEnterPasscode
+        room={room}
+        open={openModalEnterPasscode}
+        onClose={() => setOpenModalEnterPasscode(false)}
+      />
       <div
         key={room.id}
         style={{
@@ -343,6 +360,7 @@ function CardRoom({ room }: { room: Room }) {
             room.status === "Playing" || room.participants >= room.max_players
           }
           style={{ padding: "0.5rem 1rem" }}
+          onClick={handleJoinRoom}
         >
           {room.status === "Playing" ? "Spectate" : "Join"}
         </Button>

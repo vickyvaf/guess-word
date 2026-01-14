@@ -7,93 +7,102 @@ import { useNavigate } from "@tanstack/react-router";
 import { Crown, SearchX, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { User as UserType, RoomParticipant } from "@/supabase/model";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function WaitingRoomScreen() {
   const navigate = useNavigate();
   const { user } = useSettings();
   const roomCode = window.location.pathname.split("/").pop(); // Get code from URL
-  const [room, setRoom] = useState<Room | null>(null);
-  const [participants, setParticipants] = useState<
-    (RoomParticipant & { user: UserType })[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  // 1. Get Room
+  const { data: room, isLoading: isLoadingRoom } = useQuery({
+    queryKey: ["room", roomCode],
+    queryFn: async () => {
+      if (!roomCode) return null;
+      const { room, error } = await services.rooms.getByNameOrCode(roomCode);
+      if (error) throw error;
+      return room;
+    },
+    enabled: !!roomCode,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
+  // 2. Join Room (Side Effect)
   useEffect(() => {
-    if (!roomCode || !user) return;
+    if (room && user) {
+      services.rooms.joinRoom(room.id, user.id).then(() => {
+        // Invalidate participants to ensure we are in the list
+        queryClient.invalidateQueries({ queryKey: ["participants", room.id] });
+      });
+    }
+  }, [room, user, queryClient]);
 
-    const initRoom = async () => {
-      setIsLoading(true);
-      // 1. Get Room
-      const { room: roomData, error } =
-        await services.rooms.getByNameOrCode(roomCode);
-
-      if (error || !roomData) {
-        setIsLoading(false);
-        return;
-      }
-      setRoom(roomData);
-
-      // 2. Join Room (if not already joined)
-      // We ignore error here because unique constraint (already joined) is expected
-      await services.rooms.joinRoom(roomData.id, user.id);
-
-      // 3. Get Participants
-      const fetchParticipants = async () => {
-        const { participants: parts } = await services.rooms.getParticipants(
-          roomData.id
+  // 3. Get Participants
+  const { data: participants = [], isLoading: isLoadingParticipants } =
+    useQuery({
+      queryKey: ["participants", room?.id],
+      queryFn: async () => {
+        if (!room?.id) return [];
+        const { participants } = await services.rooms.getParticipants(room.id);
+        return (
+          (participants?.filter((p) => p.user) as (RoomParticipant & {
+            user: UserType;
+          })[]) || []
         );
-        if (parts) {
-          // Filter out any where user join failed or something
-          setParticipants(
-            parts.filter((p) => p.user) as (RoomParticipant & {
-              user: UserType;
-            })[]
-          );
+      },
+      enabled: !!room?.id,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    });
+
+  const isLoading = isLoadingRoom || isLoadingParticipants;
+
+  // 4. Realtime Subscription & Presence
+  useEffect(() => {
+    if (!room || !user) return;
+
+    const channel = supabase
+      .channel(`room_${room.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "room_participants",
+          filter: `room_id=eq.${room.id}`,
+        },
+        () => {
+          // Invalidate participants query to refetch
+          queryClient.invalidateQueries({
+            queryKey: ["participants", room.id],
+          });
         }
-      };
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "rooms",
+          filter: `id=eq.${room.id}`,
+        },
+        (payload) => {
+          const newRoom = payload.new as Room;
+          // Update room data in cache
+          queryClient.setQueryData(["room", roomCode], newRoom);
 
-      await fetchParticipants();
-      setIsLoading(false);
-
-      // 4. Subscribe to new participants
-      const channel = supabase
-        .channel(`room_${roomData.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "room_participants",
-            filter: `room_id=eq.${roomData.id}`,
-          },
-          (payload) => {
-            fetchParticipants();
+          if (newRoom.status === "Playing") {
+            navigate({ to: `/playing/${newRoom.room_code}` });
           }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "rooms",
-            filter: `id=eq.${roomData.id}`,
-          },
-          (payload) => {
-            const newRoom = payload.new as Room;
-            if (newRoom.status === "Playing") {
-              navigate({ to: `/playing/${newRoom.room_code}` });
-            }
-          }
-        )
-        .subscribe();
+        }
+      )
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    return () => {
+      supabase.removeChannel(channel);
     };
-
-    initRoom();
-  }, [roomCode, user]);
+  }, [room, queryClient, navigate, roomCode]);
 
   const handleStartGame = async () => {
     if (!room) return;
@@ -404,20 +413,20 @@ export function WaitingRoomScreen() {
         ))}
       </div>
 
-      {/* Only Host can start the game (or if debugging without host check) */}
-
-      {(!room.host_id || room.host_id === user?.id) && (
-        <div
-          style={{
-            width: "100%",
-            padding: "1rem",
-            background: "transparent",
-            display: "flex",
-            justifyContent: "center",
-            flexShrink: 0,
-            zIndex: 10,
-          }}
-        >
+      {/* Button Section */}
+      <div
+        style={{
+          width: "100%",
+          padding: "1rem",
+          background: "transparent",
+          display: "flex",
+          justifyContent: "center",
+          flexShrink: 0,
+          zIndex: 10,
+          gap: "1rem",
+        }}
+      >
+        {(!room.host_id || room.host_id === user?.id) && (
           <Button
             onClick={handleStartGame}
             fontSize="1.5rem"
@@ -426,8 +435,8 @@ export function WaitingRoomScreen() {
           >
             Start Game
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

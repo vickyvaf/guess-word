@@ -288,15 +288,33 @@ export function ModalCreateRoom() {
   );
 }
 
-export function ModalEnterPasscode({ room }: { room: Room }) {
-  const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState(false);
+export function ModalEnterPasscode({
+  room,
+  open,
+  onClose,
+}: {
+  room: Room;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const navigate = useNavigate();
+
   const [passcodeInput, setPasscodeInput] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
+  function handleJoinPrivateRoom() {
+    if (passcodeInput !== room?.room_code) {
+      setPasscodeError("Incorrect passcode");
+      return;
+    } else {
+      navigate({ to: `/waiting/${room?.room_code}` });
+    }
+  }
+
   return (
     <Modal
-      open={isPasscodeModalOpen}
-      onClose={() => setIsPasscodeModalOpen(false)}
+      open={open}
+      onClose={onClose}
       title={`Enter Passcode for ${room?.name}`}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -320,6 +338,7 @@ export function ModalEnterPasscode({ room }: { room: Room }) {
             style={{ width: "100%" }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
+                handleJoinPrivateRoom();
               }
             }}
           />
@@ -345,7 +364,7 @@ export function ModalEnterPasscode({ room }: { room: Room }) {
           }}
         >
           <Button
-            onClick={() => setIsPasscodeModalOpen(false)}
+            onClick={onClose}
             fontSize="1.2rem"
             style={{ background: "#eee", width: "100%", color: "#000" }}
           >
@@ -355,6 +374,7 @@ export function ModalEnterPasscode({ room }: { room: Room }) {
             fontSize="1.2rem"
             disabled={!passcodeInput.trim()}
             style={{ width: "100%" }}
+            onClick={handleJoinPrivateRoom}
           >
             Join Room
           </Button>
