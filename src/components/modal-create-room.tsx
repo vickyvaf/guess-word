@@ -7,7 +7,7 @@ import { Modal } from "@/uikits/modal";
 import { Switch } from "@/uikits/switch";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Dices, User } from "lucide-react";
+import { Dices, Plus, User } from "lucide-react";
 import { useState } from "react";
 
 const RANDOM_ADJECTIVES = [
@@ -106,10 +106,16 @@ export function ModalCreateRoom() {
       <Button
         fontSize="1.5rem"
         className="responsive-btn"
-        style={{ whiteSpace: "nowrap" }}
+        style={{
+          whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          justifyContent: "center",
+        }}
         onClick={handleOpenModal}
       >
-        + Add
+        <Plus /> Create Room
       </Button>
 
       <Modal open={isOpen} onClose={handleCloseModal} title="Create New Room">

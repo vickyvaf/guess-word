@@ -30,15 +30,24 @@ export function ChooseRoomScreen() {
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "rooms",
         },
         (payload) => {
-          queryClient.setQueryData<Room[]>(
-            ["rooms", { search: searchRoomName }],
-            (oldData) => [payload.new as Room, ...(oldData || [])]
-          );
+          if (payload.eventType === "UPDATE") {
+            queryClient.setQueryData<Room[]>(
+              ["rooms", { search: searchRoomName }],
+              (oldData) => [payload.new as Room, ...(oldData || [])]
+            );
+          }
+          if (payload.eventType === "DELETE") {
+            queryClient.setQueryData<Room[]>(
+              ["rooms", { search: searchRoomName }],
+              // @ts-ignore
+              (oldData) => oldData?.filter((room) => room.id !== payload.new.id)
+            );
+          }
         }
       )
       .subscribe();

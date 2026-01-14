@@ -117,11 +117,12 @@ export function ModalSettings() {
                   <Button
                     onClick={signOut}
                     style={{
-                      border: "2px solid black",
+                      border: "2px solid var(--button-border)",
                       borderRadius: "10px",
                       padding: "8px 12px",
                       background: "var(--button-bg)",
-                      boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
+                      color: "var(--button-text)",
+                      boxShadow: "3px 3px 0 var(--button-shadow)",
                       fontWeight: 600,
                       fontSize: "1rem",
                     }}
@@ -137,10 +138,11 @@ export function ModalSettings() {
                     width: 48,
                     height: 48,
                     borderRadius: "50%",
-                    border: "2px solid black",
+                    border: "2px solid var(--button-border)",
                     display: "grid",
                     placeItems: "center",
-                    background: "#f3f4f6",
+                    background: "var(--button-disabled-bg)",
+                    color: "var(--button-text)",
                     fontWeight: 700,
                   }}
                   title="Not connected"
@@ -165,11 +167,12 @@ export function ModalSettings() {
                   <Button
                     onClick={signInWithGoogle}
                     style={{
-                      border: "2px solid black",
+                      border: "2px solid var(--button-border)",
                       borderRadius: "10px",
                       padding: "8px 12px",
-                      background: "white",
-                      boxShadow: "3px 3px 0 rgba(0,0,0,0.2)",
+                      background: "var(--button-bg)",
+                      color: "var(--button-text)",
+                      boxShadow: "3px 3px 0 var(--button-shadow)",
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
