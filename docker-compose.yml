@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        SUPABASE_TARGET_URL: ${SUPABASE_TARGET_URL}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    ports:
+      - "4173:4173"
+    restart: always
