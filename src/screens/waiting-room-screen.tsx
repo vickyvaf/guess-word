@@ -284,7 +284,7 @@ export function WaitingRoomScreen() {
           padding: "1rem",
           flex: 1,
           overflowY: "auto",
-          alignContent: "center",
+          alignContent: "start",
         }}
       >
         {participants.map((p) => (
