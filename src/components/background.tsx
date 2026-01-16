@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 export function MathGridBg({
   cell = 32,
   major = 160,
@@ -7,15 +5,6 @@ export function MathGridBg({
   cell?: number;
   major?: number;
 }) {
-  const [visible, setVisible] = useState(window.location.pathname !== "/");
-
-  useEffect(() => {
-    if (window.location.pathname === "/") {
-      const t = setTimeout(() => setVisible(true), 100);
-      return () => clearTimeout(t);
-    }
-  }, []);
-
   const style = {
     width: "100vw",
     height: "100vh",
@@ -34,9 +23,7 @@ export function MathGridBg({
       ${major}px ${major}px,
       ${major}px ${major}px
     `,
-    clipPath: visible
-      ? "polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      : "polygon(0 0, 0 0, 0 0, 0 0)",
+    clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
     transition: "clip-path 1s ease-out",
   } as const;
 

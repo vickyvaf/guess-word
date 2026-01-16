@@ -34,9 +34,6 @@ const getRankStyle = (rank: number) => {
 export function ModalLeaderboard() {
   const { user } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
-  const [shouldAnimate] = useState(
-    () => performance.now() < 2000 && window.location.pathname === "/"
-  );
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -54,7 +51,6 @@ export function ModalLeaderboard() {
     <>
       <img
         src="/champion.png"
-        className={`logo ${shouldAnimate ? "fade-in-delayed" : ""}`}
         alt="Leaderboard"
         style={{
           position: "absolute",

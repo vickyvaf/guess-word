@@ -1,15 +1,12 @@
-import { useState } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
 import { Button } from "@/uikits/button";
 import { Modal } from "@/uikits/modal";
 import { SettingsIcon } from "lucide-react";
-import { useSettings } from "@/contexts/SettingsContext";
+import { useState } from "react";
 
 export function ModalSettings() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signInWithGoogle, signOut, loading } = useSettings();
-  const [shouldAnimate] = useState(
-    () => performance.now() < 2000 && window.location.pathname === "/"
-  );
 
   const renderButtonIcon = () => {
     if (loading) {
@@ -42,7 +39,6 @@ export function ModalSettings() {
   return (
     <>
       <Button
-        className={shouldAnimate ? "fade-in-delayed" : ""}
         onClick={() => setIsOpen(true)}
         rounded={true}
         style={{
