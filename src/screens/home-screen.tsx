@@ -6,7 +6,6 @@ export function HomeScreen() {
 
   return (
     <div
-      className={"fade-in-delayed"}
       style={{
         width: "100%",
         position: "absolute",
