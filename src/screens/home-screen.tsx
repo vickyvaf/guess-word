@@ -1,8 +1,10 @@
 import { Button } from "@/uikits/button";
 import { useNavigate } from "@tanstack/react-router";
+import { useDevice } from "@/hooks/use-device";
 
 export function HomeScreen() {
   const navigate = useNavigate();
+  const isMobile = useDevice();
 
   return (
     <div
@@ -22,7 +24,7 @@ export function HomeScreen() {
       <p
         style={{
           margin: 0,
-          fontSize: "1.5rem",
+          fontSize: isMobile ? "1rem" : "1.5rem",
           maxWidth: "900px",
           lineHeight: 1.4,
           userSelect: "none",
@@ -32,7 +34,7 @@ export function HomeScreen() {
       >
         <span
           style={{
-            fontSize: "3rem",
+            fontSize: isMobile ? "2rem" : "3rem",
             fontWeight: "bold",
           }}
         >

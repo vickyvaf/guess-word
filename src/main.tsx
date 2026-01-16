@@ -1,11 +1,12 @@
+import { ErrorFallback } from "@/components/error-fallback";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { routeTree } from "./routeTree.gen";
-import * as Sentry from "@sentry/react";
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN, // Setting this option to true will send default PII data to Sentry.
@@ -37,20 +38,34 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider
-      client={
-        new QueryClient({
-          defaultOptions: {
-            queries: {
-              refetchOnWindowFocus: false,
-            },
-          },
-        })
-      }
+    <Sentry.ErrorBoundary
+      fallback={({ error, resetError }) => (
+        <ErrorFallback error={error as Error} resetErrorBoundary={resetError} />
+      )}
+      onError={(error) => {
+        Sentry.captureException(error);
+      }}
     >
-      <SettingsProvider>
-        <RouterProvider router={router} />
-      </SettingsProvider>
-    </QueryClientProvider>
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: {
+              queries: {
+                refetchOnWindowFocus: false,
+              },
+              mutations: {
+                onError: (error) => {
+                  Sentry.captureException(error);
+                },
+              },
+            },
+          })
+        }
+      >
+        <SettingsProvider>
+          <RouterProvider router={router} />
+        </SettingsProvider>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
   </StrictMode>
 );

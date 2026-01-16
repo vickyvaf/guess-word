@@ -1,4 +1,5 @@
 import { useSettings } from "@/contexts/SettingsContext";
+import { useDevice } from "@/hooks/use-device";
 import type { Room } from "@/supabase/model";
 import { services } from "@/supabase/service";
 import { Button } from "@/uikits/button";
@@ -45,6 +46,8 @@ function generateRandomName() {
 
 export function ModalCreateRoom() {
   const navigate = useNavigate();
+
+  const isMobile = useDevice();
 
   const { user } = useSettings();
 
@@ -192,9 +195,9 @@ export function ModalCreateRoom() {
               >
                 <Button
                   onClick={() =>
-                    setMaxParticipants(Math.max(1, maxParticipants - 1))
+                    setMaxParticipants(Math.max(2, maxParticipants - 1))
                   }
-                  disabled={maxParticipants <= 1}
+                  disabled={maxParticipants <= 2}
                   style={{
                     padding: "0.5rem",
                     fontSize: "1rem",
@@ -264,6 +267,7 @@ export function ModalCreateRoom() {
               justifyContent: "space-between",
               gap: "1rem",
               marginTop: "1rem",
+              flexDirection: isMobile ? "column" : "row",
             }}
           >
             <Button

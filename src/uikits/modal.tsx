@@ -32,7 +32,7 @@ export function Modal({
         background: "var(--modal-overlay)",
         display: "grid",
         placeItems: "center",
-        zIndex: 50,
+        zIndex: 999,
       }}
       onClick={onClose}
     >

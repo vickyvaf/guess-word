@@ -60,10 +60,11 @@ export const services = {
     },
   },
   rooms: {
-    getAllRooms: async () => {
+    getAllRooms: async ({ search }: { search?: string }) => {
       const { data, error } = await supabase
         .from("rooms")
         .select("*")
+        .ilike("name", `%${search || ""}%`)
         .eq("status", "Waiting")
         .order("created_at", { ascending: false });
 

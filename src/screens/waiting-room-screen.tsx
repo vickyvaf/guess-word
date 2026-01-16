@@ -277,7 +277,7 @@ export function WaitingRoomScreen() {
 
       <div
         style={{
-          width: "100%",
+          maxWidth: "100%",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
           gap: "1rem",
@@ -285,6 +285,7 @@ export function WaitingRoomScreen() {
           flex: 1,
           overflowY: "auto",
           alignContent: "start",
+          height: "100px",
         }}
       >
         {participants.map((p) => (
@@ -303,6 +304,7 @@ export function WaitingRoomScreen() {
               boxShadow: "4px 4px 0 var(--button-shadow)",
               aspectRatio: "1/1",
               justifyContent: "center",
+              maxHeight: "300px",
             }}
           >
             <div
@@ -386,6 +388,7 @@ export function WaitingRoomScreen() {
               borderRadius: "1rem",
               aspectRatio: "1/1",
               justifyContent: "center",
+              maxHeight: "300px",
             }}
           >
             <div

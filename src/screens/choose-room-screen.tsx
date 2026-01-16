@@ -22,7 +22,9 @@ export function ChooseRoomScreen() {
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms", { search: debouncedSearchRoomName }],
     queryFn: async () => {
-      const { rooms } = await services.rooms.getAllRooms();
+      const { rooms } = await services.rooms.getAllRooms({
+        search: debouncedSearchRoomName,
+      });
       return rooms || [];
     },
   });
