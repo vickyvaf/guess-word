@@ -75,22 +75,18 @@ export function ModalCreateRoom() {
       }
 
       const { room, error } = await services.rooms.createRoom({
-        name: newRoomName,
         room_code: Math.floor(1000 + Math.random() * 9000).toString(),
-        participants: 1,
         max_players: maxParticipants,
-        status: "Waiting",
+        status: "waiting",
         is_private: isPrivate,
-        created_by: user.id,
         host_id: user.id,
+        max_lives: 3,
+        question_category: newRoomName || "General",
+        game_duration_seconds: 600,
       });
 
       if (error || !room) {
         throw new Error(error?.message || "Failed to create room");
-      }
-
-      if (user?.id) {
-        await services.rooms.updateRoom(room.id, { participants: 1 });
       }
 
       return room;
@@ -133,13 +129,13 @@ export function ModalCreateRoom() {
                 fontSize: "1.2rem",
               }}
             >
-              Room Name
+              Room Category
             </label>
             <div
               style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
             >
               <Input
-                placeholder="Enter room name"
+                placeholder="Enter room category"
                 value={newRoomName}
                 onChange={(e) => setNewRoomName(e.target.value)}
                 style={{ width: "100%" }}
@@ -319,7 +315,7 @@ export function ModalEnterPasscode({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Enter Passcode for ${room?.name}`}
+      title={`Enter Passcode for ${room?.room_code}`}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         <div>

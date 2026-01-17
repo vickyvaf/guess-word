@@ -10,7 +10,7 @@ import { Button } from "@/uikits/button";
 import { Input } from "@/uikits/input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Ghost, Globe, Lock, User } from "lucide-react";
+import { Ghost, Globe, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function ChooseRoomScreen() {
@@ -22,9 +22,7 @@ export function ChooseRoomScreen() {
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms", { search: debouncedSearchRoomName }],
     queryFn: async () => {
-      const { rooms } = await services.rooms.getAllRooms({
-        search: debouncedSearchRoomName,
-      });
+      const { rooms } = await services.rooms.getAllRooms();
       return rooms || [];
     },
   });
@@ -43,17 +41,18 @@ export function ChooseRoomScreen() {
           if (payload.eventType === "UPDATE") {
             queryClient.setQueryData<Room[]>(
               ["rooms", { search: debouncedSearchRoomName }],
-              (oldData) => [payload.new as Room, ...(oldData || [])]
+              (oldData) => [payload.new as Room, ...(oldData || [])],
             );
           }
           if (payload.eventType === "DELETE") {
             queryClient.setQueryData<Room[]>(
               ["rooms", { search: debouncedSearchRoomName }],
               // @ts-ignore
-              (oldData) => oldData?.filter((room) => room.id !== payload.old.id)
+              (oldData) =>
+                oldData?.filter((room) => room.id !== payload.old.id),
             );
           }
-        }
+        },
       )
       .subscribe();
 
@@ -272,7 +271,7 @@ function CardRoom({ room }: { room: Room }) {
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-            {room.name}
+            {room.question_category}
           </span>
 
           <div
@@ -309,9 +308,9 @@ function CardRoom({ room }: { room: Room }) {
             <span
               style={{
                 color:
-                  room.status === "Playing" ? "#fff" : "var(--button-text)",
+                  room.status === "playing" ? "#fff" : "var(--button-text)",
                 backgroundColor:
-                  room.status === "Playing" ? "#ff9800" : "#4caf50",
+                  room.status === "playing" ? "#ff9800" : "#4caf50",
                 fontWeight: "bold",
                 fontSize: "0.8rem",
                 padding: "0.1rem 0.5rem",
@@ -334,37 +333,19 @@ function CardRoom({ room }: { room: Room }) {
               color: "#666",
             }}
           >
-            <div style={{ display: "flex", gap: "2px" }}>
-              {[...Array(room.max_players)].map((_, i) => (
-                <User
-                  key={i}
-                  size={20}
-                  fill={i < room.participants ? "currentColor" : "none"}
-                  style={{
-                    color:
-                      i < room.participants
-                        ? "var(--modal-text)"
-                        : "var(--input-border)",
-                    opacity: i < room.participants ? 1 : 0.5,
-                  }}
-                />
-              ))}
-            </div>
             <span style={{ fontSize: "0.9rem", marginLeft: "0.5rem" }}>
-              {room.participants}/{room.max_players}
+              {room.max_players} Players
             </span>
           </div>
         </div>
 
         <Button
           fontSize="1rem"
-          disabled={
-            room.status === "Playing" || room.participants >= room.max_players
-          }
+          disabled={room.status === "playing"}
           style={{ padding: "0.5rem 1rem" }}
           onClick={handleJoinRoom}
         >
-          {room.status === "Playing" ? "Spectate" : "Join"}
+          {room.status === "playing" ? "Spectate" : "Join"}
         </Button>
       </div>
     </>

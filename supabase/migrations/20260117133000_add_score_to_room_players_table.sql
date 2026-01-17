@@ -1,0 +1,1 @@
+ALTER TABLE room_players ADD COLUMN score INT NOT NULL DEFAULT 0;

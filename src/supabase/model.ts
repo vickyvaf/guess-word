@@ -40,6 +40,7 @@ export interface RoomPlayer {
   is_alive: boolean;
   current_question_id: string | null;
   question_expires_at: string | null;
+  score: number;
   joined_at: string;
 }
 

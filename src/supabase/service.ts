@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { User, Room, RoomParticipant } from "./model";
+import type { User, Room, RoomPlayer } from "./model";
 
 export const services = {
   users: {
@@ -60,12 +60,11 @@ export const services = {
     },
   },
   rooms: {
-    getAllRooms: async ({ search }: { search?: string }) => {
+    getAllRooms: async () => {
       const { data, error } = await supabase
         .from("rooms")
         .select("*")
-        .ilike("name", `%${search || ""}%`)
-        .eq("status", "Waiting")
+        .eq("status", "waiting")
         .order("created_at", { ascending: false });
 
       return { rooms: data as Room[], error };
@@ -74,7 +73,7 @@ export const services = {
       const { data, error } = await supabase
         .from("rooms")
         .select("*")
-        .or(`name.eq.${query},room_code.eq.${query}`)
+        .eq("room_code", query)
         .single();
 
       return { room: data as Room, error };
@@ -83,7 +82,7 @@ export const services = {
       const { data, error } = await supabase
         .from("rooms")
         .select("*")
-        .ilike("name", `%${query}%`)
+        .ilike("question_category", `%${query}%`)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -110,24 +109,24 @@ export const services = {
     },
     joinRoom: async (roomId: string, userId: string) => {
       const { error } = await supabase
-        .from("room_participants")
+        .from("room_players")
         .insert({ room_id: roomId, user_id: userId });
 
       return { error };
     },
     getParticipants: async (roomId: string) => {
       const { data, error } = await supabase
-        .from("room_participants")
+        .from("room_players")
         .select(
           `
           *,
           user:users(*)
-        `
+        `,
         )
         .eq("room_id", roomId);
 
       return {
-        participants: data as (RoomParticipant & { user: User })[],
+        participants: data as (RoomPlayer & { user: User })[],
         error,
       };
     },
@@ -135,7 +134,7 @@ export const services = {
       const { data, error } = await supabase
         .from("rooms")
         .update({
-          status: "Playing",
+          status: "playing",
           current_round: 1,
         })
         .eq("id", roomId)
@@ -146,7 +145,7 @@ export const services = {
     },
     updateScore: async (roomId: string, userId: string, score: number) => {
       const { error } = await supabase
-        .from("room_participants")
+        .from("room_players")
         .update({ score })
         .eq("room_id", roomId)
         .eq("user_id", userId);

@@ -213,11 +213,7 @@ export function ModalLeaderboard() {
                             }}
                           >
                             <img
-                              src={
-                                user.avatar_url ||
-                                user.picture ||
-                                "/default-avatar.jpg"
-                              }
+                              src={user.avatar_url || "/default-avatar.jpg"}
                               alt={user.full_name}
                               style={{
                                 width: "40px",
@@ -228,7 +224,7 @@ export function ModalLeaderboard() {
                               }}
                               onError={(e) => {
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                  user.full_name
+                                  user.full_name,
                                 )}&background=random`;
                               }}
                             />
@@ -277,7 +273,7 @@ export function ModalLeaderboard() {
                     >
                       {(() => {
                         const meInList = data?.users?.find(
-                          (u) => u.id === user?.id
+                          (u) => u.id === user?.id,
                         );
                         const meInListRank = meInList
                           ? data.users.indexOf(meInList) + 1
@@ -311,7 +307,6 @@ export function ModalLeaderboard() {
                                 <img
                                   src={
                                     displayMe.avatar_url ||
-                                    displayMe.picture ||
                                     "/default-avatar.jpg"
                                   }
                                   alt={displayMe.full_name}
@@ -324,7 +319,7 @@ export function ModalLeaderboard() {
                                   }}
                                   onError={(e) => {
                                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                      displayMe.full_name
+                                      displayMe.full_name,
                                     )}&background=random`;
                                   }}
                                 />

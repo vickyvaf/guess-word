@@ -26,5 +26,18 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "react-vendor": ["react", "react-dom", "react-error-boundary"],
+            supabase: ["@supabase/supabase-js"],
+            tanstack: ["@tanstack/react-query", "@tanstack/react-router"],
+            xstate: ["xstate", "@xstate/react"],
+            "ui-vendor": ["lucide-react"],
+          },
+        },
+      },
+    },
   };
 });

@@ -1,7 +1,6 @@
 import { HealthPoint } from "@/components/health-point";
 import { useSettings } from "@/contexts/SettingsContext";
-import data from "@/data.json";
-import type { Room, RoomParticipant, User } from "@/supabase/model";
+import type { Question, Room, RoomPlayer, User } from "@/supabase/model";
 import { services } from "@/supabase/service";
 import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
@@ -17,7 +16,7 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
 
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<
-    (RoomParticipant & { user: User })[]
+    (RoomPlayer & { user: User })[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,7 +41,7 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
 
       // 2. Get initial participants
       const { participants: parts } = await services.rooms.getParticipants(
-        roomData.id
+        roomData.id,
       );
       if (parts) setParticipants(parts);
 
@@ -62,7 +61,7 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
           (payload) => {
             const newRoom = payload.new as Room;
             setRoom(newRoom);
-          }
+          },
         )
         .on(
           "postgres_changes",
@@ -79,7 +78,7 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
               .then(({ participants: parts }) => {
                 if (parts) setParticipants(parts);
               });
-          }
+          },
         )
         .subscribe();
 
@@ -99,30 +98,16 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
     // For now, let's assume we just want to play a local game SYNCED via DB?
     // Or actually, simpler: Host sets the word.
 
-    if (room.host_id === user.id && !room.current_word) {
-      // Pick random word
-      const questions = Object.values(data).flat();
-      const randomQ = questions[Math.floor(Math.random() * questions.length)];
-
-      services.rooms.updateRoom(room.id, {
-        current_word: randomQ.answer,
-        // We could also store clue in DB if we added a column,
-        // but for now let's just stick to "answer" and look up clue locally or if clue is not needed?
-        // WAIT. We need the CLUE.
-        // Let's assume we just store the generic "current_word" which includes data.
-        // Actually, better to just store index or just the word string.
-        // To keep it simple: We need to match the word to get the clue.
-      });
+    if (room.host_id === user.id) {
+      // TODO: Host logic to assign questions
     }
   }, [room, user]);
 
   // Derived State
-  const currentQuestion = useMemo(() => {
-    if (!room?.current_word) return null;
-    // Find question data based on answer match
-    const questions = Object.values(data).flat();
-    return questions.find((q) => q.answer === room.current_word);
-  }, [room?.current_word]);
+  const currentQuestion = useMemo<Question | null>(() => {
+    // TODO: Implement question fetching based on room state
+    return null;
+  }, [room]);
 
   // Countdown
   useEffect(() => {
@@ -133,14 +118,15 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
 
   const answerChars = useMemo(
     () => (currentQuestion?.answer ?? "").toUpperCase().split(""),
-    [currentQuestion]
+    [currentQuestion],
   );
 
   const isSolved = useMemo(() => {
-    const alphaChars = answerChars.filter((ch) => /[A-Z]/.test(ch));
+    if (!currentQuestion) return false;
+    const alphaChars = answerChars.filter((ch: string) => /[A-Z]/.test(ch));
     if (alphaChars.length === 0) return false;
-    return alphaChars.every((ch) => guessed.includes(ch));
-  }, [answerChars, guessed]);
+    return alphaChars.every((ch: string) => guessed.includes(ch));
+  }, [answerChars, guessed, currentQuestion]);
 
   // Update Score when Solved
   useEffect(() => {
@@ -252,11 +238,12 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
               marginBottom: "2rem",
             }}
           >
-            {currentQuestion.clue}
+            {/* Clue Logic to be implemented */}
+            {currentQuestion?.category || "Guess the word"}
           </div>
 
           <div style={{ display: "flex", justifyContent: "center" }}>
-            {answerChars.map((letter, index) => {
+            {answerChars.map((letter: string, index: number) => {
               const isAlpha = /[A-Z]/.test(letter);
               const show = !isAlpha || guessed.includes(letter);
               return (
@@ -338,7 +325,7 @@ export function PlayingScreen({ roomId }: { roomId: string }) {
               <h2 className="text-4xl font-black mb-4">Game Over</h2>
               <p className="text-xl">
                 The word was:{" "}
-                <span className="font-bold">{currentQuestion.answer}</span>
+                <span className="font-bold">{currentQuestion?.answer}</span>
               </p>
               <Button onClick={() => navigate({ to: "/" })} className="mt-4">
                 Back to Menu

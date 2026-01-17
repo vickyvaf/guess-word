@@ -1,12 +1,11 @@
 import { useSettings } from "@/contexts/SettingsContext";
-import type { Room } from "@/supabase/model";
+import type { Room, RoomPlayer, User as UserType } from "@/supabase/model";
 import { services } from "@/supabase/service";
 import { supabase } from "@/supabase/supabase";
 import { Button } from "@/uikits/button";
 import { useNavigate } from "@tanstack/react-router";
 import { Crown, SearchX, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { User as UserType, RoomParticipant } from "@/supabase/model";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function WaitingRoomScreen() {
@@ -46,7 +45,7 @@ export function WaitingRoomScreen() {
         if (!room?.id) return [];
         const { participants } = await services.rooms.getParticipants(room.id);
         return (
-          (participants?.filter((p) => p.user) as (RoomParticipant & {
+          (participants?.filter((p) => p.user) as (RoomPlayer & {
             user: UserType;
           })[]) || []
         );
@@ -77,7 +76,7 @@ export function WaitingRoomScreen() {
           queryClient.invalidateQueries({
             queryKey: ["participants", room.id],
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -92,10 +91,10 @@ export function WaitingRoomScreen() {
           // Update room data in cache
           queryClient.setQueryData(["room", roomCode], newRoom);
 
-          if (newRoom.status === "Playing") {
+          if (newRoom.status === "playing") {
             navigate({ to: `/playing/${newRoom.room_code}` });
           }
-        }
+        },
       )
       .subscribe();
 
@@ -252,7 +251,7 @@ export function WaitingRoomScreen() {
         }}
       >
         <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
-          Room: {room.name || room.room_code}
+          Room: {room.question_category || room.room_code}
         </h1>
         <div
           style={{
