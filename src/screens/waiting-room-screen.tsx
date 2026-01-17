@@ -198,6 +198,7 @@ export function WaitingRoomScreen() {
           alignItems: "center",
           flexDirection: "column",
           gap: "1.5rem",
+          padding: "1rem",
         }}
       >
         <div
@@ -211,12 +212,15 @@ export function WaitingRoomScreen() {
         >
           <SearchX size={64} className="opacity-50" />
           <h1 style={{ margin: 0, fontSize: "2rem" }}>Room not found</h1>
-          <p className="opacity-70">
+          <p className="opacity-70" style={{ textAlign: "center" }}>
             The code you entered might be incorrect or the room has expired.
           </p>
         </div>
-        <Button fontSize="1.5rem" onClick={() => navigate({ to: "/" })}>
-          Go Home
+        <Button
+          fontSize="1.5rem"
+          onClick={() => navigate({ to: "/choose-room" })}
+        >
+          Choose other room
         </Button>
       </div>
     );

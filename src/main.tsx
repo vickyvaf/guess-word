@@ -52,6 +52,7 @@ createRoot(document.getElementById("root")!).render(
             defaultOptions: {
               queries: {
                 refetchOnWindowFocus: false,
+                retry: 0,
               },
               mutations: {
                 onError: (error) => {
