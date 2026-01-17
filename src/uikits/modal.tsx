@@ -33,6 +33,7 @@ export function Modal({
         display: "grid",
         placeItems: "center",
         zIndex: 999,
+        overflowY: "auto",
       }}
       onClick={onClose}
     >
